@@ -30,7 +30,7 @@ namespace ft
         typedef T               value_type;
         typedef T*              pointer;
         typedef T&              reference;
-        typedef	ft::random_access_iterator_tag	iterator_category;
+        typedef	ft::Random_access_iterator_tag	iterator_category;
     };
 
     // 특수화. 상수 포인터인 경우.
@@ -42,7 +42,7 @@ namespace ft
         typedef const T         value_type;
         typedef const T*        pointer;
         typedef const T&        reference;
-        typedef	ft::random_access_iterator_tag	iterator_category;
+        typedef	ft::Random_access_iterator_tag	iterator_category;
     };
 
     // // bool값을 담는 클래스. 진짜 그냥 true/false를 담기 위해 사용.

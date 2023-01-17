@@ -1,4 +1,5 @@
 #include "./base_iterator.hpp"
+#include "../utils/traits.hpp"
 
 namespace ft
 {
@@ -15,7 +16,7 @@ namespace ft
         pointer _ptr;
     public:
         Random_access_iterator()
-        : _ptr(u_nullptr) {}
+        : _ptr(0) {}
         // 포인터(T*)를 통해 생성하는 생성자
         Random_access_iterator(pointer ptr)
         : _ptr(ptr) {}
@@ -114,15 +115,7 @@ namespace ft
     {
         return (lhs.base() == rhs.base());
     }
-    /* For iterator == const_iterator */
-    // L과 R이 서로 다르지만, 원소끼리 비교 연산이 정의 되어 있을 때.
-    template<typename T_L, typename T_R>
-    typename ft::Random_access_iterator<T_L>::difference_type
-    operator==(const ft::Random_access_iterator<T_L> lhs,
-            const ft::Random_access_iterator<T_R> rhs)
-    {
-        return (lhs.base() == rhs.base());
-    }
+
     // != 비교 연산
     template <typename T>
     typename ft::Random_access_iterator<T>::difference_type
@@ -190,13 +183,6 @@ namespace ft
     typename ft::Random_access_iterator<T>::difference_type
     operator>=(const ft::Random_access_iterator<T> lhs,
             const ft::Random_access_iterator<T> rhs)
-    {
-        return (lhs.base() >= rhs.base());
-    }
-
-    template <typename T>
-    typename ft::Random_access_iterator<T>::difference_type
-    operator>=(const ft::Random_access_iterator<T> lhs, const ft::Random_access_iterator<T> rhs)
     {
         return (lhs.base() >= rhs.base());
     }

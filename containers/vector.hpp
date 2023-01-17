@@ -2,6 +2,8 @@
 # define VECTOR_HPP
 
 #include <memory> // for allocator
+#include <stdexcept> //for exception
+
 
 #include "./random_access_iterator.hpp"
 
@@ -29,8 +31,8 @@ namespace ft
     // 외부로 부터 숨기는 맴버.
     private:
         allocator_type  _data_allocator; // 외부로 부터 받아온 할당기 *인스턴스*
-        pointer         _start; // 원소 시작 위치
-        pointer         _finish;   // 마지막 원소 위치
+        pointer         _start; // 원소 시작 위치. T*
+        pointer         _finish;   // 마지막 원소 위치 + 1, T*
         pointer         _end_of_storage; // 실제 저장공간 마지막 위치.
         
 // 생성자
@@ -82,7 +84,7 @@ namespace ft
         ~vector()
         {
             this->clear();
-            _alloc.deallocate(_start, this->capacity());
+            _data_allocator.deallocate(_start, this->capacity());
         }
 
 // 제공 함수들
@@ -141,7 +143,7 @@ Allocator:
         /*************[Capacity]*************/
         size_type size(void) const
         {
-            return (this->_end - this->_start);
+            return (this->_finish - this->_start);
         }
 
         size_type max_size(void) const
@@ -151,43 +153,45 @@ Allocator:
 
         void resize(size_type n, value_type val = value_type())
         {
-            if(n < _size)
+            if (n > this->max_size())
             {
-                for (size_type i = n; i < _size ; i++)
-                {
-                    _data_allocator.destory(_start + n);
-                }
-                _size = n;
+                throw (std::length_error("vector::resize"));
             }
-            else if (n > _size)
+            else if(n < this->size())
             {
-                if (_capacity < n)
+                for (size_type i = n; i < this->size() ; i++)
                 {
-                    if (n > 2 * _capacity)
+                    _data_allocator.destroy(--_finish);
+                }
+            }
+            else if (n > this->size())
+            {
+                if (this->_end_of_storage - this->_start < n)
+                {
+                    if (n > 2 * (this->_end_of_storage - this->_start))
                     {
-                        this->resize(n);
+                        this->reserve(n);
                     }
                     else
                     {
-                        this->reserve(2 * _capacity);
+                        this->reserve(2 * (this->_end_of_storage - this->_start));
                     }
                 }
-                for (size_type i = _size; i < n; i++)
+                for (size_type i = this->size(); i < n; i++)
                 {
-                    _allocator.construct(_first + i, val);
-                    _size++;
+                    _data_allocator.construct(this->_start + i, val);
                 }
             }
         }
 
-        size_type   capacity (void) const
+        size_type capacity (void)
         {
-            return (this->_end_capacity - this->_start);
+            return (this->_end_of_storage - this->_start);
         }
 
-        size_type   capacity (void) const
+        size_type capacity (void) const
         {
-            return (this->_end_capacity - this->_start);
+            return (this->_end_of_storage - this->_start);
         }
 
         bool empty (void) const
@@ -203,21 +207,26 @@ Allocator:
             }
             else if (n > this->capacity())
             {
-                pointer prev_start = _start;
-                pointer prev_end = _end;
-                size_type prev_size = this->size();
-                size_type prev_capacity = this->capacity();
+                // pointer prev_start = _start;
+                // pointer prev_end = _end;
+                // size_type prev_size = this->size();
+                // size_type prev_capacity = this->capacity();
                 
-                pointer new_start = _data_aloccator.allocate(n);
-                pointer new_end = new_start + n;
-                _end_capacity = _start + n;
-                _end = _start;
-                for (int i = _end; i < n i++)
+                pointer new_start = _data_allocator.allocate(n);
+                pointer new_finish = new_start + n;
+                size_type new_size = n;
+                pointer new_capacity = new_start + n;
+                //_end_capacity = _start + n;
+                //_end = _start;
+                while (this->_start != this->_finish)
                 {
-                    _data_aloccator.construct(_end + i, *prev_start);
-                    prev_start++;
+                    this->_data_allocator.construct(new_start, *this->_start);
                 }
-                _alloc.deallocate(prev_start - prev_size, prev_capacity);
+                this->clear();
+                this->_start = new_start;
+                this->_finish = new_finish;
+                this->_end_of_storage = new_capacity;
+                //_alloc.deallocate(prev_start - prev_size, prev_capacity);
             }
         }
 
@@ -234,14 +243,20 @@ Allocator:
 
         reference at (size_type n)
         {
-            checkRange(n);
-            return ((*this)[n]);
+            if (n >= this->size())
+            {
+                throw std::out_of_range("ft::at() out of range");
+            }
+            return (*(_start + n));
         }
 
         const_reference at (size_type n) const
         {
-            checkRange(n);
-            return ((*this)[n]);
+            if (n >= this->size())
+            {
+                throw std::out_of_range("ft::at() const out of range");
+            }
+            return (*(_start + n));
         }
 
         reference front ()
@@ -256,12 +271,12 @@ Allocator:
 
         reference back ()
         {
-            return (*(_end - 1));
+            return (*(_finish - 1));
         }
 
         const_reference back () const
         {
-            return (*(_end - 1));
+            return (*(_finish - 1));
         }
     };
 }

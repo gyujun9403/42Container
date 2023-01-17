@@ -133,7 +133,7 @@ Allocator:
             size_type val_size = sizeof(value_type);
             for (size_type i = 0; i < data_size; i++)
             {
-                _alloc.destroy(_start + i * val_size);
+                _data_allocator.destroy(_start + i * val_size);
             }
             _finish = _start;
         }
@@ -153,15 +153,27 @@ Allocator:
         {
             if(n < _size)
             {
-                for(size_type i = n; i < _size; i++)
-                    _allocator.destroy(_first + i);
+                for (size_type i = n; i < _size ; i++)
+                {
+                    _data_allocator.destory(_start + n);
+                }
                 _size = n;
             }
             else if (n > _size)
             {
                 if (_capacity < n)
-                    this->reserve(_capacity * 2 > n ? _capacity * 2 : n);
-                for (size_type i = _size; i < n; i++){
+                {
+                    if (n > 2 * _capacity)
+                    {
+                        this->resize(n);
+                    }
+                    else
+                    {
+                        this->reserve(2 * _capacity);
+                    }
+                }
+                for (size_type i = _size; i < n; i++)
+                {
                     _allocator.construct(_first + i, val);
                     _size++;
                 }
@@ -172,18 +184,23 @@ Allocator:
         {
             return (this->_end_capacity - this->_start);
         }
+
         size_type   capacity (void) const
         {
             return (this->_end_capacity - this->_start);
         }
+
         bool empty (void) const
         {
             return (size() == 0 ? true : false);
         }
+
         void reserve (size_type n)
         {
             if (n > this->max_size())
+            {
                 throw (std::length_error("vector::reserve"));
+            }
             else if (n > this->capacity())
             {
                 pointer prev_start = _start;
@@ -191,17 +208,60 @@ Allocator:
                 size_type prev_size = this->size();
                 size_type prev_capacity = this->capacity();
                 
-                _start = _alloc.allocate( n );
+                pointer new_start = _data_aloccator.allocate(n);
+                pointer new_end = new_start + n;
                 _end_capacity = _start + n;
                 _end = _start;
-                while (prev_start != prev_end)
+                for (int i = _end; i < n i++)
                 {
-                    _alloc.construct(_end, *prev_start);
-                    _end++;
+                    _data_aloccator.construct(_end + i, *prev_start);
                     prev_start++;
                 }
                 _alloc.deallocate(prev_start - prev_size, prev_capacity);
             }
+        }
+
+        /*************[access]*************/
+        reference operator[] (size_type n)
+        {
+            return (*(_start + n));
+        }
+
+        const_reference operator[] (size_type n) const
+        {
+            return (*(_start + n));
+        }
+
+        reference at (size_type n)
+        {
+            checkRange(n);
+            return ((*this)[n]);
+        }
+
+        const_reference at (size_type n) const
+        {
+            checkRange(n);
+            return ((*this)[n]);
+        }
+
+        reference front ()
+        {
+            return (*_start);
+        }
+
+        const_reference front () const
+        {
+            return (*_start);
+        }
+
+        reference back ()
+        {
+            return (*(_end - 1));
+        }
+
+        const_reference back () const
+        {
+            return (*(_end - 1));
         }
     };
 }

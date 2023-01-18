@@ -29,11 +29,13 @@ namespace ft
         typedef          const Random_access_iterator<value_type> const_iterator;
 
     // 외부로 부터 숨기는 맴버.
-    private:
+    //private:
         allocator_type  _data_allocator; // 외부로 부터 받아온 할당기 *인스턴스*
         pointer         _start; // 원소 시작 위치. T*
         pointer         _finish;   // 마지막 원소 위치 + 1, T*
-        pointer         _end_of_storage; // 실제 저장공간 마지막 위치.
+        //pointer         _end_of_storage; // 실제 저장공간 마지막 위치.
+        size_type       _size;
+        size_type       _capacity;
         
 // 생성자
     public:
@@ -49,25 +51,26 @@ namespace ft
             vector (const vector& x);
         */
         explicit vector(const allocator_type& alloc = allocator_type())
-        : _data_allocator(alloc), _start(0), _finish(0), _end_of_storage(0)
+        : _data_allocator(alloc), _start(0), _finish(0), _size(0), _capacity(0) //_end_of_storage(0), 
         {
             // 디폴트 및 alloc만 넣었을 때 생성자.
             // 시작 및 끝 위치는 0(null), 크기를 표시할 포인터도 0 
         }
 
         explicit vector (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
-        : _data_allocator(alloc)
+        : _data_allocator(alloc), _size(n), _capacity(n)
         {
             // 할당 크기 n만 들어오거나, val을 n개 채우는 경우.
             size_type val_size = sizeof(val);
             _start = _data_allocator.allocate(n);
             for (size_type i = 0; i < n; i++)
             {
-                _data_allocator.construct(_start + (i * val_size), val);
+
+                _data_allocator.construct(_start + i, val);
                 //_start + (i * val_size) = val;
             }
-            _finish = _start + (n * val_size);
-            _end_of_storage = _finish;
+            _finish = _start + n;
+            //_end_of_storage = _finish;
         }
 
         // 이건 enable_if를 쓰니 그거 참고하기.
@@ -131,19 +134,18 @@ Allocator:
 */
         void clear()
         {
-            size_type data_size = _finish - _start;
-            size_type val_size = sizeof(value_type);
-            for (size_type i = 0; i < data_size; i++)
+            for (size_type i = 0; i < _size; i++)
             {
-                _data_allocator.destroy(_start + i * val_size);
+                _data_allocator.destroy(_start + i);
             }
             _finish = _start;
+            _size = 0;
         }
 
         /*************[Capacity]*************/
         size_type size(void) const
         {
-            return (this->_finish - this->_start);
+            return this->_size;
         }
 
         size_type max_size(void) const
@@ -157,46 +159,52 @@ Allocator:
             {
                 throw (std::length_error("vector::resize"));
             }
-            else if(n < this->size())
+            else if(n < this->_size)
             {
-                for (size_type i = n; i < this->size() ; i++)
+                for (size_type i = n; i < this->_size ; i++)
                 {
                     _data_allocator.destroy(--_finish);
                 }
+                _size = n;
             }
             else if (n > this->size())
             {
-                if (this->_end_of_storage - this->_start < n)
+                if (this->_capacity < n)
                 {
-                    if (n > 2 * (this->_end_of_storage - this->_start))
+                    if (n > 2 * (this->_capacity))
                     {
                         this->reserve(n);
                     }
                     else
                     {
-                        this->reserve(2 * (this->_end_of_storage - this->_start));
+                        this->reserve(2 * _capacity);
                     }
                 }
-                for (size_type i = this->size(); i < n; i++)
+                for (size_type i = 0; i < n; i++)
                 {
                     _data_allocator.construct(this->_start + i, val);
                 }
+                _size = n;
             }
         }
 
         size_type capacity (void)
         {
-            return (this->_end_of_storage - this->_start);
+            return this->_capacity;
         }
 
         size_type capacity (void) const
         {
-            return (this->_end_of_storage - this->_start);
+            return this->_capacity;
         }
 
         bool empty (void) const
         {
-            return (size() == 0 ? true : false);
+            if (this->_size == 0)
+            {
+                return true;
+            }
+            return false;
         }
 
         void reserve (size_type n)
@@ -205,7 +213,7 @@ Allocator:
             {
                 throw (std::length_error("vector::reserve"));
             }
-            else if (n > this->capacity())
+            else if (n > this->_capacity)
             {
                 // pointer prev_start = _start;
                 // pointer prev_end = _end;
@@ -213,19 +221,19 @@ Allocator:
                 // size_type prev_capacity = this->capacity();
                 
                 pointer new_start = _data_allocator.allocate(n);
-                pointer new_finish = new_start + n;
-                size_type new_size = n;
-                pointer new_capacity = new_start + n;
+                size_type new_size = this->_size;
                 //_end_capacity = _start + n;
                 //_end = _start;
-                while (this->_start != this->_finish)
+                for (int i = 0; i < new_size; i++)
                 {
-                    this->_data_allocator.construct(new_start, *this->_start);
+                    this->_data_allocator.construct(new_start + i, *this->_start);
                 }
                 this->clear();
                 this->_start = new_start;
-                this->_finish = new_finish;
-                this->_end_of_storage = new_capacity;
+                this->_finish = new_start + new_size;
+                //this->_end_of_storage = new_finish + new_capacity;
+                this->_size = new_size;
+                this->_capacity = n;
                 //_alloc.deallocate(prev_start - prev_size, prev_capacity);
             }
         }

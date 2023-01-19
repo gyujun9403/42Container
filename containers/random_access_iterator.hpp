@@ -1,3 +1,6 @@
+#ifndef RANDOM_ACCESS_ITERATOR_HPP
+# define RANDOM_ACCESS_ITERATOR_HPP
+
 #include "./base_iterator.hpp"
 #include "../utils/traits.hpp"
 
@@ -7,11 +10,11 @@ namespace ft
     class Random_access_iterator : public Base_iterator<T>
     {
     public:
+        typedef typename ft::Random_access_iterator_tag iterator_category;
         typedef typename ft::iterator_traits<T>::difference_type difference_type;
         typedef typename ft::iterator_traits<T>::value_type value_type;
-        typedef T*               pointer;
-        typedef T&             reference;
-        typedef typename ft::Random_access_iterator_tag iterator_category;
+        typedef T*  pointer;
+        typedef T&  reference;
     private:
         pointer _ptr;
     public:
@@ -210,3 +213,5 @@ namespace ft
         return (lhs.base() - rhs.base());
     }
 }
+
+#endif

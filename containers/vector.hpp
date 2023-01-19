@@ -377,11 +377,16 @@ Allocator:
 			if (position < begin() || position > end())
 				throw std::logic_error("vector");
 			difference_type start = position - begin();
+            // 꽉 차있을때
 			if (_size == _capacity){
 				_capacity = _capacity * 2 + (_capacity == 0);
+                // 새 공간
 				pointer new_arr = _allocator.allocate(_capacity);
+                // 삽입 직전가지 복사
 				std::uninitialized_copy(begin(), position, iterator(new_arr));
+                // 삽입자리에 생성
 				_allocator.construct(new_arr + start, val);
+                // 삽입 뒤에  복사
 				std::uninitialized_copy(position, end(), iterator(new_arr + start + 1));
 				for (size_t i = 0; i < _size; i++)
 					_allocator.destroy(_first + i);
@@ -409,12 +414,16 @@ Allocator:
 			else if (max_size() - _size < n)
 				throw std::length_error("vector");
 			difference_type start = position - begin();
+            // 새 공간 할당해야할 때
 			if (_size + n > _capacity){
 				size_type new_cap = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
 				pointer new_arr = _allocator.allocate(new_cap);
+                // 시작부터 할당 전까지
 				std::uninitialized_copy(begin(), position, iterator(new_arr));
+                // 삽입할거
 				for (size_type i = 0; i < n; i++)
 					_allocator.construct(new_arr + start + i, val);
+                // 이후 
 				std::uninitialized_copy(position, end(), iterator(new_arr + start + n));
 				for (size_type i = 0; i < _size; i++)
 					_allocator.destroy(_first + i);
@@ -423,6 +432,7 @@ Allocator:
 				_capacity = new_cap;
 				_first = new_arr;
 			}
+            // 공간할당 필요 없음
 			else {
 				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
 					_allocator.destroy(_first + i + n - 1);
@@ -441,7 +451,7 @@ Allocator:
         void insert (iterator position, InputIterator first, InputIterator last)
         {
 
-				if (position < begin() || position > end() || first > last)
+			if (position < begin() || position > end() || first > last)
 				throw std::logic_error("vector");
 			size_type start = static_cast<size_type>(position - begin());
 			size_type count = static_cast<size_type>(last - first);

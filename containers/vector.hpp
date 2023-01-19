@@ -6,6 +6,7 @@
 
 
 #include "./random_access_iterator.hpp"
+#include "./reverse_iterator.hpp"
 
 namespace ft
 {
@@ -27,6 +28,8 @@ namespace ft
 
         typedef          Random_access_iterator<value_type> iterator;
         typedef          const Random_access_iterator<value_type> const_iterator;
+        typedef          Reverse_iterator<const_iterator> const_reverse_iterator;
+		typedef          Reverse_iterator<iterator> reverse_iterator;
 
     // 외부로 부터 숨기는 맴버.
     //private:
@@ -132,15 +135,6 @@ Modifiers:
 Allocator:
     get_allocator	Get allocator (public member function)
 */
-        void clear()
-        {
-            for (size_type i = 0; i < _size; i++)
-            {
-                _data_allocator.destroy(_start + i);
-            }
-            _finish = _start;
-            _size = 0;
-        }
 
         /*************[Capacity]*************/
         size_type size(void) const
@@ -285,6 +279,260 @@ Allocator:
         const_reference back () const
         {
             return (*(_finish - 1));
+        }
+
+        /*************[iterator]*************/
+        iterator begin()
+        {
+            return (iterator(_first)); // 반복자(임의접근)에 주소를 담음
+            // ->
+        }
+
+        const_iterator begin()
+        {
+            return (const_iterator(_first));
+        }
+
+        iterator end()
+        {
+            return (iterator(_first + _size));
+        }
+
+        const_iterator end()
+        {
+            return (const_iterator(_first + _size));
+        }
+
+        reverse_iterator rbegin()
+        {
+            return (reverse_iterator(end()));
+        }
+
+        const_reverse_iterator rbegin()
+        {
+            return (const_reverse_iterator(end()));
+        }
+
+        reverse_iterator rend()
+        {
+            return (reverse_iterator(begin()));
+        }
+
+        const_reverse_iterator rend()
+        {
+            return (const_reverse_iterator (begin()));
+        }
+
+        /*************[modifiers]*************/
+        template <class InputIterator>
+        void assign (InputIterator first, InputIterator last,
+         typename enable_if<!is_integral<InputIterator>::value>::type* = 0){
+				if(first > last)
+					throw std::logic_error("vector");
+				difference_type count = last - first;
+				clear();
+				if (count > static_cast<difference_type>(capacity())){
+					_allocator.deallocate(_first, _capacity);
+					_first = _allocator.allocate(count);
+					_capacity = count;
+				}
+				iterator pos = begin();
+				while (first < last)
+				{
+					_allocator.construct(&(*pos), *first);
+					pos++;
+					first++;
+				}
+				_size = count;
+			}
+        void assign (size_type n, const value_type& val)
+        {
+			clear();
+			if (n > _capacity){
+				_allocator.deallocate(_first, _capacity);
+				_first = _allocator.allocate(n);
+				_capacity = n;
+			}
+			for (size_type i = 0; i < n; i++)
+				_allocator.construct(_first + i, val);
+			_size = n;
+		}
+
+        void push_back (const value_type& val)
+        {
+			if(_size == _capacity)
+				reserve(_capacity == 0 ? 1 : _capacity * 2);
+			_allocator.construct(_first + _size, val);
+			_size++;
+		}
+
+        void pop_back()
+        {
+			_allocator.destroy(_first + _size - 1);
+			_size--;
+		}
+
+        iterator insert (iterator position, const value_type& val)
+        {
+			if (position < begin() || position > end())
+				throw std::logic_error("vector");
+			difference_type start = position - begin();
+			if (_size == _capacity){
+				_capacity = _capacity * 2 + (_capacity == 0);
+				pointer new_arr = _allocator.allocate(_capacity);
+				std::uninitialized_copy(begin(), position, iterator(new_arr));
+				_allocator.construct(new_arr + start, val);
+				std::uninitialized_copy(position, end(), iterator(new_arr + start + 1));
+				for (size_t i = 0; i < _size; i++)
+					_allocator.destroy(_first + i);
+				if(_size)
+					_allocator.deallocate(_first, _size);
+				_size++;
+				_first = new_arr;
+			}
+			else {
+				for (size_type i = _size; i > static_cast<size_type>(start); i--){
+					_allocator.destroy(_first + i);
+					_allocator.construct(_first + i, *(_first + i - 1));
+				}
+				_allocator.destroy(&(*position));
+				_allocator.construct(&(*position), val);
+				_size++;
+			}
+			return (begin() + start);
+		}
+
+        void insert (iterator position, size_type n, const value_type& val)
+        {
+			if (n == 0)
+				return ;
+			else if (max_size() - _size < n)
+				throw std::length_error("vector");
+			difference_type start = position - begin();
+			if (_size + n > _capacity){
+				size_type new_cap = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
+				pointer new_arr = _allocator.allocate(new_cap);
+				std::uninitialized_copy(begin(), position, iterator(new_arr));
+				for (size_type i = 0; i < n; i++)
+					_allocator.construct(new_arr + start + i, val);
+				std::uninitialized_copy(position, end(), iterator(new_arr + start + n));
+				for (size_type i = 0; i < _size; i++)
+					_allocator.destroy(_first + i);
+				_allocator.deallocate(_first, _capacity);
+				_size += n;
+				_capacity = new_cap;
+				_first = new_arr;
+			}
+			else {
+				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
+					_allocator.destroy(_first + i + n - 1);
+					_allocator.construct(_first + i + n - 1, *(_first + i - 1));
+				}
+				for (size_type i = 0; i < n; i++){
+					_allocator.destroy(_first + i + start);
+					_allocator.construct(_first + i + start, val);
+				}
+				_size += n;
+			}
+		}
+
+
+        template <class InputIterator>
+        void insert (iterator position, InputIterator first, InputIterator last)
+        {
+
+				if (position < begin() || position > end() || first > last)
+				throw std::logic_error("vector");
+			size_type start = static_cast<size_type>(position - begin());
+			size_type count = static_cast<size_type>(last - first);
+			if (_size + count > _capacity) {
+				size_type new_cap = _capacity * 2 >= _size + count ? _capacity * 2 : _size + count;
+				pointer new_arr = _allocator.allocate(new_cap);
+				std::uninitialized_copy(begin(), position, iterator(new_arr));
+				try {
+					for (size_type i = 0; i < static_cast<size_type>(count); i++, first++)
+						_allocator.construct(new_arr + start + i, *first);
+				}
+				catch (...){
+					for (size_type i = 0; i < count + start; ++i)
+						_allocator.destroy(new_arr + i);
+					_allocator.deallocate(new_arr, new_cap);
+					throw;
+				}
+				std::uninitialized_copy(position, end(), iterator(new_arr + start + count));
+				for (size_type i = 0; i < _size; i++)
+					_allocator.destroy(_first + i);
+				_allocator.deallocate(_first, _capacity);
+				_size += count;
+				_capacity = new_cap;
+				_first = new_arr;
+			}
+			else {
+				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
+					_allocator.destroy(_first + i + count - 1);
+					_allocator.construct(_first + i + count - 1, *(_first + i - 1));
+				}
+				for (size_type i = 0; i < static_cast<size_type>(count); i++, first++) {
+					_allocator.destroy(_first + i + count);
+					_allocator.construct(_first + start + i, *first);
+				}
+				_size += count;
+			}
+		}
+
+        iterator erase (iterator position)
+        {
+			size_type d = static_cast<size_type>(std::distance(begin(), position));
+			for (size_type i = d; i < _size - 1; ++i){
+				_allocator.destroy(_first + i);
+				_allocator.construct(_first + i, *(_first + i + 1));
+			}
+			_size--;
+			_allocator.destroy(_first + _size - 1);
+			return iterator(_first + d);
+		}
+
+
+        iterator erase (iterator first, iterator last)
+        {
+			difference_type start = std::distance(begin(), first);
+			difference_type need_to_copy = std::distance(last, end());
+			bool last_is_end = (last == end());
+			while (first != last){
+				_allocator.destroy(&(*first));
+				first++;
+			}
+			size_type i = start;
+			while (last < end()){
+				if (this->_first + start)
+					_allocator.destroy(_first + i);
+				_allocator.construct(_first + i, *last);
+				i++;
+				last++;
+			}
+			for (size_type i = start + need_to_copy; i < _size; i++)
+				_allocator.destroy(_first + i);
+			_size = start + need_to_copy;
+			return last_is_end ? end() : iterator(_first + start);
+		}
+
+        void swap (vector& x)
+        {
+			std::swap(_first, x._first);
+			std::swap(_size, x._size);
+			std::swap(_capacity, x._capacity);
+			std::swap(_allocator, x._allocator);
+
+		}
+
+        void clear()
+        {
+            for (size_type i = 0; i < _size; i++)
+            {
+                _data_allocator.destroy(_start + i);
+            }
+            _finish = _start;
+            _size = 0;
         }
     };
 }

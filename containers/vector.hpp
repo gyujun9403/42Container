@@ -222,7 +222,7 @@ Allocator:
                 {
                     this->_data_allocator.construct(new_start + i, *this->_start);
                 }
-                this->clear();
+                this->clear(); // 이전꺼 남아 있어서 leak발생!
                 this->_start = new_start;
                 this->_finish = new_start + new_size;
                 //this->_end_of_storage = new_finish + new_capacity;
@@ -326,121 +326,160 @@ Allocator:
         /*************[modifiers]*************/
         template <class InputIterator>
         void assign (InputIterator first, InputIterator last,
-         typename enable_if<!is_integral<InputIterator>::value>::type* = 0){
-				if(first > last)
-					throw std::logic_error("vector");
-				difference_type count = last - first;
-				clear();
-				if (count > static_cast<difference_type>(capacity())){
-					_allocator.deallocate(_first, _capacity);
-					_first = _allocator.allocate(count);
-					_capacity = count;
-				}
-				iterator pos = begin();
-				while (first < last)
-				{
-					_allocator.construct(&(*pos), *first);
-					pos++;
-					first++;
-				}
-				_size = count;
-			}
+            typename enable_if<!is_integral<InputIterator>::value>::type* = 0)
+        {
+            if(first > last)
+            {
+                throw std::logic_error("vector"); // TODO
+            }
+            size_type size = static_cast<size_type>(last - first);
+            this->clear();
+            this->resize(size);
+            for (size_type i = 0; i < size; i++)
+            {
+                _data_allocator.construct(start + i, *first);
+            }
+        }
+
         void assign (size_type n, const value_type& val)
         {
 			clear();
-			if (n > _capacity){
-				_allocator.deallocate(_first, _capacity);
-				_first = _allocator.allocate(n);
-				_capacity = n;
+			if (n > _capacity)
+            {
+                this->resize(n);
 			}
 			for (size_type i = 0; i < n; i++)
-				_allocator.construct(_first + i, val);
-			_size = n;
+            {
+				_data_allocator.construct(_first + i, val);
+            }
+
 		}
 
         void push_back (const value_type& val)
         {
 			if(_size == _capacity)
-				reserve(_capacity == 0 ? 1 : _capacity * 2);
-			_allocator.construct(_first + _size, val);
-			_size++;
+            {
+                if (_capacity == 0)
+                {
+                    reserve(1);
+                }
+                else
+                {
+				    reserve(_capacity * 2);
+                }
+            }
+			_data_allocator.construct(_first + _size, val);
+			++_size;
 		}
 
         void pop_back()
         {
-			_allocator.destroy(_first + _size - 1);
-			_size--;
+			_data_allocator.destroy(_first + _size - 1);
+			--_size;
 		}
 
         iterator insert (iterator position, const value_type& val)
         {
 			if (position < begin() || position > end())
-				throw std::logic_error("vector");
-			difference_type start = position - begin();
+            {
+				throw std::logic_error("vector"); // TODO
+            }
+			size_type pos_len = static_cast<size_type>(position - begin());
+            size_type target_len = _size + 1;
             // 꽉 차있을때
-			if (_size == _capacity){
+			if (_size == _capacity)
+            {
 				_capacity = _capacity * 2 + (_capacity == 0);
                 // 새 공간
-				pointer new_arr = _allocator.allocate(_capacity);
+				pointer new_start = _data_allocator.allocate(_capacity);
                 // 삽입 직전가지 복사
-				std::uninitialized_copy(begin(), position, iterator(new_arr));
+				for (size_type i = 0 i < pos_len i++)
+                {
+                    _data_allocator.construct(new_start + i, *(_start + i));
+                }
                 // 삽입자리에 생성
-				_allocator.construct(new_arr + start, val);
+				_data_allocator.construct(new_start + start, val);
                 // 삽입 뒤에  복사
-				std::uninitialized_copy(position, end(), iterator(new_arr + start + 1));
-				for (size_t i = 0; i < _size; i++)
-					_allocator.destroy(_first + i);
-				if(_size)
-					_allocator.deallocate(_first, _size);
-				_size++;
-				_first = new_arr;
+                for (i = pos_len; i + 1 < target_len; i++)
+                {
+                    _data_allocator.construct(new_start + i + 1, *(_start + i));
+                }
+                this->clear(); // 이전꺼 남아 있어서 leak발생!
+				_first = new_start;
+                _size = target_len;
+                _finish = _first + _size;
+                _capacity = target_len;
 			}
-			else {
-				for (size_type i = _size; i > static_cast<size_type>(start); i--){
-					_allocator.destroy(_first + i);
-					_allocator.construct(_first + i, *(_first + i - 1));
+			else
+            {
+                // 맨 뒤에서부터
+				for (size_type i = _size; i > pos_len; i--)
+                {
+                    _data_allocator.construct(_start + i + 1, *(_start + 1));
+                    _data_allocator.destroy(_start + i);
+					// _data_allocator.destroy(_first + i);
+					// _data_allocator.construct(_first + i, *(_first + i - 1));
 				}
-				_allocator.destroy(&(*position));
-				_allocator.construct(&(*position), val);
+				//_data_allocator.destroy(&(*position));
+				_data_allocator.construct(_start + pos_len, val);
 				_size++;
+                _finish++;
 			}
-			return (begin() + start);
+			return (iterator(_start + pos_len));
 		}
 
         void insert (iterator position, size_type n, const value_type& val)
         {
 			if (n == 0)
-				return ;
+            {
+				return ; // TODO
+            }
 			else if (max_size() - _size < n)
-				throw std::length_error("vector");
-			difference_type start = position - begin();
+            {
+				throw std::length_error("vector"); // TODO
+            }
+			size_type pos_len = static_cast<size_type>(position - _start);
             // 새 공간 할당해야할 때
-			if (_size + n > _capacity){
-				size_type new_cap = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
-				pointer new_arr = _allocator.allocate(new_cap);
+			if (_size + n > _capacity)
+            {
+				size_type new_capacity = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
+				pointer new_start = _data_allocator.allocate(new_cap);
                 // 시작부터 할당 전까지
-				std::uninitialized_copy(begin(), position, iterator(new_arr));
+                for (size_type i = 0; i < pos_len; i++)
+                {
+                    _data_allocator.construct(new_start + i, *(_start + i));
+                }
                 // 삽입할거
-				for (size_type i = 0; i < n; i++)
-					_allocator.construct(new_arr + start + i, val);
+				pointer temp_start = new_start + pos_len;
+                for (size_type i = 0; i < n; i++)
+                {
+                    _data_allocator.construct(temp_start + i, val);
+                }
                 // 이후 
-				std::uninitialized_copy(position, end(), iterator(new_arr + start + n));
+                size_type len_left = static_cast<size_type>(_finish - position);
+                for (int i = 0; i < len_left; i++)
+                {
+                    _data_allocator.construct(temp_start + position + i, *(_start + position + i));
+                }
 				for (size_type i = 0; i < _size; i++)
-					_allocator.destroy(_first + i);
-				_allocator.deallocate(_first, _capacity);
+                {
+					_data_allocator.destroy(_first + i);
+                }
+				_data_allocator.deallocate(_first, _capacity);
 				_size += n;
-				_capacity = new_cap;
-				_first = new_arr;
+				_capacity = new_capacity;
+				_start = new_start;
+                _finish = new_start + size;
 			}
             // 공간할당 필요 없음
 			else {
 				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
-					_allocator.destroy(_first + i + n - 1);
-					_allocator.construct(_first + i + n - 1, *(_first + i - 1));
+					_data_allocator.destroy(_first + i + n - 1);
+					_data_allocator.construct(_first + i + n - 1, *(_first + i - 1));
 				}
 				for (size_type i = 0; i < n; i++){
-					_allocator.destroy(_first + i + start);
-					_allocator.construct(_first + i + start, val);
+					_data_allocator.destroy(_first + i + start);
+					_data_allocator.construct(_first + i + start, val);
 				}
 				_size += n;
 			}
@@ -457,34 +496,34 @@ Allocator:
 			size_type count = static_cast<size_type>(last - first);
 			if (_size + count > _capacity) {
 				size_type new_cap = _capacity * 2 >= _size + count ? _capacity * 2 : _size + count;
-				pointer new_arr = _allocator.allocate(new_cap);
+				pointer new_arr = _data_allocator.allocate(new_cap);
 				std::uninitialized_copy(begin(), position, iterator(new_arr));
 				try {
 					for (size_type i = 0; i < static_cast<size_type>(count); i++, first++)
-						_allocator.construct(new_arr + start + i, *first);
+						_data_allocator.construct(new_arr + start + i, *first);
 				}
 				catch (...){
 					for (size_type i = 0; i < count + start; ++i)
-						_allocator.destroy(new_arr + i);
-					_allocator.deallocate(new_arr, new_cap);
+						_data_allocator.destroy(new_arr + i);
+					_data_allocator.deallocate(new_arr, new_cap);
 					throw;
 				}
 				std::uninitialized_copy(position, end(), iterator(new_arr + start + count));
 				for (size_type i = 0; i < _size; i++)
-					_allocator.destroy(_first + i);
-				_allocator.deallocate(_first, _capacity);
+					_data_allocator.destroy(_first + i);
+				_data_allocator.deallocate(_first, _capacity);
 				_size += count;
 				_capacity = new_cap;
 				_first = new_arr;
 			}
 			else {
 				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
-					_allocator.destroy(_first + i + count - 1);
-					_allocator.construct(_first + i + count - 1, *(_first + i - 1));
+					_data_allocator.destroy(_first + i + count - 1);
+					_data_allocator.construct(_first + i + count - 1, *(_first + i - 1));
 				}
 				for (size_type i = 0; i < static_cast<size_type>(count); i++, first++) {
-					_allocator.destroy(_first + i + count);
-					_allocator.construct(_first + start + i, *first);
+					_data_allocator.destroy(_first + i + count);
+					_data_allocator.construct(_first + start + i, *first);
 				}
 				_size += count;
 			}
@@ -494,11 +533,11 @@ Allocator:
         {
 			size_type d = static_cast<size_type>(std::distance(begin(), position));
 			for (size_type i = d; i < _size - 1; ++i){
-				_allocator.destroy(_first + i);
-				_allocator.construct(_first + i, *(_first + i + 1));
+				_data_allocator.destroy(_first + i);
+				_data_allocator.construct(_first + i, *(_first + i + 1));
 			}
 			_size--;
-			_allocator.destroy(_first + _size - 1);
+			_data_allocator.destroy(_first + _size - 1);
 			return iterator(_first + d);
 		}
 
@@ -509,19 +548,19 @@ Allocator:
 			difference_type need_to_copy = std::distance(last, end());
 			bool last_is_end = (last == end());
 			while (first != last){
-				_allocator.destroy(&(*first));
+				_data_allocator.destroy(&(*first));
 				first++;
 			}
 			size_type i = start;
 			while (last < end()){
 				if (this->_first + start)
-					_allocator.destroy(_first + i);
-				_allocator.construct(_first + i, *last);
+					_data_allocator.destroy(_first + i);
+				_data_allocator.construct(_first + i, *last);
 				i++;
 				last++;
 			}
 			for (size_type i = start + need_to_copy; i < _size; i++)
-				_allocator.destroy(_first + i);
+				_data_allocator.destroy(_first + i);
 			_size = start + need_to_copy;
 			return last_is_end ? end() : iterator(_first + start);
 		}
@@ -531,7 +570,7 @@ Allocator:
 			std::swap(_first, x._first);
 			std::swap(_size, x._size);
 			std::swap(_capacity, x._capacity);
-			std::swap(_allocator, x._allocator);
+			std::swap(_data_allocator, x._data_allocator);
 
 		}
 

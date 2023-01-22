@@ -7,6 +7,7 @@
 
 #include "./random_access_iterator.hpp"
 #include "./reverse_iterator.hpp"
+#include "../utils/utils.hpp"
 
 namespace ft
 {
@@ -60,6 +61,7 @@ namespace ft
             // 시작 및 끝 위치는 0(null), 크기를 표시할 포인터도 0 
         }
 
+        // fill
         explicit vector (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
         : _data_allocator(alloc), _size(n), _capacity(n)
         {
@@ -77,20 +79,56 @@ namespace ft
         }
 
         // 이건 enable_if를 쓰니 그거 참고하기.
-        // template <class InputIterator>
-        // vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
-        // {
+        // range
+        template <typename InputIterator>
+        vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(), 
+            typename ft::enable_if<!is_integral<InputIterator>::value, InputIterator>::type* = 0)
+        : _data_allocator(alloc)
+        {
+            // if the range specified by [first,last) is not valid, it causes undefined behavior.
+            _size = last - first;
+            _capacity = _size;
+            _start = _data_allocator.allocate(_capacity);
+            for (size_type i = 0; i < _size; i++)
+            {
+                _data_allocator.construct(_start + i, *(first + i));
+            }
+        }
 
-        // }
+        vector (const vector& x)
+        : _size(0), _capacity(0), _data_allocator(x._data_allocator)
+        {
+            operator=(x);
+        }
 
-        // vector (const vector& x)
-        // {
-            
-        // }
         ~vector()
         {
             this->clear();
             _data_allocator.deallocate(_start, this->capacity());
+        }
+
+        vector& operator= (const vector& x)
+        {
+            if (*this == x)
+            {
+                return *this;
+            }
+            this->clear();
+            if (_capacity < x._size)
+            {
+                if (_capacity != 0)
+                {
+                    _data_allocator.deallocate(_start, _capacity);
+                }
+                _start = _data_allocator.allocate(x._size);
+            }
+            for (size_type i = 0; i < x._size; i++)
+            {
+                _data_allocator.construct(_start + i, *(x._start + i));
+            }
+            _size = x._size;
+            _capacity = _size;
+            _finish = _start + _size;
         }
 
 // 제공 함수들
@@ -284,23 +322,23 @@ Allocator:
         /*************[iterator]*************/
         iterator begin()
         {
-            return (iterator(_first)); // 반복자(임의접근)에 주소를 담음
+            return (iterator(_start)); // 반복자(임의접근)에 주소를 담음
             // ->
         }
 
-        const_iterator begin()
+        const_iterator begin() const
         {
-            return (const_iterator(_first));
+            return (const_iterator(_start));
         }
 
         iterator end()
         {
-            return (iterator(_first + _size));
+            return (iterator(_start + _size));
         }
 
-        const_iterator end()
+        const_iterator end() const
         {
-            return (const_iterator(_first + _size));
+            return (const_iterator(_start + _size));
         }
 
         reverse_iterator rbegin()
@@ -308,7 +346,7 @@ Allocator:
             return (reverse_iterator(end()));
         }
 
-        const_reverse_iterator rbegin()
+        const_reverse_iterator rbegin() const
         {
             return (const_reverse_iterator(end()));
         }
@@ -318,15 +356,15 @@ Allocator:
             return (reverse_iterator(begin()));
         }
 
-        const_reverse_iterator rend()
+        const_reverse_iterator rend() const
         {
             return (const_reverse_iterator (begin()));
         }
 
         /*************[modifiers]*************/
-        template <class InputIterator>
+        template <typename InputIterator>
         void assign (InputIterator first, InputIterator last,
-            typename enable_if<!is_integral<InputIterator>::value>::type* = 0)
+            typename enable_if<!is_integral<InputIterator>::value, InputIterator>::type* = 0)
         {
             if(first > last)
             {
@@ -337,7 +375,7 @@ Allocator:
             this->resize(size);
             for (size_type i = 0; i < size; i++)
             {
-                _data_allocator.construct(start + i, *first);
+                _data_allocator.construct(_start + i, *first);
             }
         }
 
@@ -350,7 +388,7 @@ Allocator:
 			}
 			for (size_type i = 0; i < n; i++)
             {
-				_data_allocator.construct(_first + i, val);
+				_data_allocator.construct(_start + i, val);
             }
 
 		}
@@ -368,13 +406,13 @@ Allocator:
 				    reserve(_capacity * 2);
                 }
             }
-			_data_allocator.construct(_first + _size, val);
+			_data_allocator.construct(_start + _size, val);
 			++_size;
 		}
 
         void pop_back()
         {
-			_data_allocator.destroy(_first + _size - 1);
+			_data_allocator.destroy(_start + _size - 1);
 			--_size;
 		}
 
@@ -393,21 +431,21 @@ Allocator:
                 // 새 공간
 				pointer new_start = _data_allocator.allocate(_capacity);
                 // 삽입 직전가지 복사
-				for (size_type i = 0 i < pos_len i++)
+				for (size_type i = 0; i < pos_len; i++)
                 {
                     _data_allocator.construct(new_start + i, *(_start + i));
                 }
                 // 삽입자리에 생성
-				_data_allocator.construct(new_start + start, val);
+				_data_allocator.construct(new_start + _start, val);
                 // 삽입 뒤에  복사
-                for (i = pos_len; i + 1 < target_len; i++)
+                for (size_type i = pos_len; i + 1 < target_len; i++)
                 {
                     _data_allocator.construct(new_start + i + 1, *(_start + i));
                 }
                 this->clear(); // 이전꺼 남아 있어서 leak발생!
-				_first = new_start;
+				_start = new_start;
                 _size = target_len;
-                _finish = _first + _size;
+                _finish = _start + _size;
                 _capacity = target_len;
 			}
 			else
@@ -417,8 +455,8 @@ Allocator:
                 {
                     _data_allocator.construct(_start + i + 1, *(_start + 1));
                     _data_allocator.destroy(_start + i);
-					// _data_allocator.destroy(_first + i);
-					// _data_allocator.construct(_first + i, *(_first + i - 1));
+					// _data_allocator.destroy(_start + i);
+					// _data_allocator.construct(_start + i, *(_start + i - 1));
 				}
 				//_data_allocator.destroy(&(*position));
 				_data_allocator.construct(_start + pos_len, val);
@@ -439,11 +477,12 @@ Allocator:
 				throw std::length_error("vector"); // TODO
             }
 			size_type pos_len = static_cast<size_type>(position - _start);
+            size_type left_len = static_cast<size_type>(_finish - position);
             // 새 공간 할당해야할 때
 			if (_size + n > _capacity)
             {
 				size_type new_capacity = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
-				pointer new_start = _data_allocator.allocate(new_cap);
+				pointer new_start = _data_allocator.allocate(new_capacity);
                 // 시작부터 할당 전까지
                 for (size_type i = 0; i < pos_len; i++)
                 {
@@ -456,32 +495,35 @@ Allocator:
                     _data_allocator.construct(temp_start + i, val);
                 }
                 // 이후 
-                size_type len_left = static_cast<size_type>(_finish - position);
-                for (int i = 0; i < len_left; i++)
+                for (int i = 0; i < left_len; i++)
                 {
                     _data_allocator.construct(temp_start + position + i, *(_start + position + i));
                 }
 				for (size_type i = 0; i < _size; i++)
                 {
-					_data_allocator.destroy(_first + i);
+					_data_allocator.destroy(_start + i);
                 }
-				_data_allocator.deallocate(_first, _capacity);
+				_data_allocator.deallocate(_start, _capacity);
 				_size += n;
 				_capacity = new_capacity;
 				_start = new_start;
                 _finish = new_start + size;
 			}
             // 공간할당 필요 없음
-			else {
-				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
-					_data_allocator.destroy(_first + i + n - 1);
-					_data_allocator.construct(_first + i + n - 1, *(_first + i - 1));
-				}
-				for (size_type i = 0; i < n; i++){
-					_data_allocator.destroy(_first + i + start);
-					_data_allocator.construct(_first + i + start, val);
-				}
+			else
+            {
+                // 맨 끝부분 부터 넣어야함.
+                for (size_type i = 0; i < left_len; i++)
+                {
+                    _data_allocator.construct(_finish + n + i, *(position + n + i));
+                    _data_allocator.destroy(position + n + i);
+                }
+                for (size_type i = 0; i < n; i++)
+                {
+                    _data_allocator.construct(position + i, val);
+                }
 				_size += n;
+                _finish += n;
 			}
 		}
 
@@ -492,86 +534,108 @@ Allocator:
 
 			if (position < begin() || position > end() || first > last)
 				throw std::logic_error("vector");
-			size_type start = static_cast<size_type>(position - begin());
-			size_type count = static_cast<size_type>(last - first);
-			if (_size + count > _capacity) {
-				size_type new_cap = _capacity * 2 >= _size + count ? _capacity * 2 : _size + count;
-				pointer new_arr = _data_allocator.allocate(new_cap);
-				std::uninitialized_copy(begin(), position, iterator(new_arr));
-				try {
-					for (size_type i = 0; i < static_cast<size_type>(count); i++, first++)
-						_data_allocator.construct(new_arr + start + i, *first);
-				}
-				catch (...){
-					for (size_type i = 0; i < count + start; ++i)
-						_data_allocator.destroy(new_arr + i);
-					_data_allocator.deallocate(new_arr, new_cap);
-					throw;
-				}
-				std::uninitialized_copy(position, end(), iterator(new_arr + start + count));
+			size_type pos_len = static_cast<size_type>(position - begin());
+            size_type n = static_cast<size_type>(last - first);
+			size_type left_len = _size - pos_len;
+			if (_size + n > _capacity)
+            {
+				size_type new_capacity = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
+				pointer new_start = _data_allocator.allocate(new_capacity);
+                for (size_type i = 0; i < pos_len; i++)
+                {
+                    _data_allocator.construct(new_start + i, *(_start + i));
+                }
+                // try catch???
+                for (size_type i = 0; i < n; i)
+                {
+                    _data_allocator.construct(new_start + pos_len + i, *(_start + i));
+                }
+                for (size_type i = 0; i < left_len; i++)
+                {
+                    _data_allocator.construct(new_start + pos_len + n + i, *(new_start + pos_len + i));
+                }
 				for (size_type i = 0; i < _size; i++)
-					_data_allocator.destroy(_first + i);
-				_data_allocator.deallocate(_first, _capacity);
-				_size += count;
-				_capacity = new_cap;
-				_first = new_arr;
+                {
+					_data_allocator.destroy(_start + i);
+                }
+				_data_allocator.deallocate(_start, _capacity);
+				_size += n;
+				_capacity = new_capacity;
+				_start = new_start;
 			}
-			else {
-				for (size_type i = _size; i > static_cast<size_type>(start); i--) {
-					_data_allocator.destroy(_first + i + count - 1);
-					_data_allocator.construct(_first + i + count - 1, *(_first + i - 1));
+			else
+            {
+				for (size_type i = 0; i < left_len; i++)
+                {
+                    _data_allocator.construct(_finish + i, *(position + i));
+					_data_allocator.destroy(position + i);
 				}
-				for (size_type i = 0; i < static_cast<size_type>(count); i++, first++) {
-					_data_allocator.destroy(_first + i + count);
-					_data_allocator.construct(_first + start + i, *first);
+				for (size_type i = 0; i < n; i++)
+                {
+					_data_allocator.construct(position + i, first + i);
 				}
-				_size += count;
+				_size += n;
+                _finish += n;
 			}
 		}
 
         iterator erase (iterator position)
         {
-			size_type d = static_cast<size_type>(std::distance(begin(), position));
-			for (size_type i = d; i < _size - 1; ++i){
-				_data_allocator.destroy(_first + i);
-				_data_allocator.construct(_first + i, *(_first + i + 1));
-			}
-			_size--;
-			_data_allocator.destroy(_first + _size - 1);
-			return iterator(_first + d);
+            size_type left_len = _finish - position;
+            _data_allocator.destroy(position);
+            for (size_type i = 0; i < left_len - 1 ; i++)
+            {
+                _data_allocator.construct(position + i, *(position + i + 1));
+                _data_allocator.destroy(position + i + 1);
+            }
+            --_size;
+            --_finish;
 		}
 
 
         iterator erase (iterator first, iterator last)
         {
-			difference_type start = std::distance(begin(), first);
-			difference_type need_to_copy = std::distance(last, end());
-			bool last_is_end = (last == end());
-			while (first != last){
-				_data_allocator.destroy(&(*first));
-				first++;
-			}
-			size_type i = start;
-			while (last < end()){
-				if (this->_first + start)
-					_data_allocator.destroy(_first + i);
-				_data_allocator.construct(_first + i, *last);
-				i++;
-				last++;
-			}
-			for (size_type i = start + need_to_copy; i < _size; i++)
-				_data_allocator.destroy(_first + i);
-			_size = start + need_to_copy;
-			return last_is_end ? end() : iterator(_first + start);
+            size_type n = last - first;
+            size_type left_len = _size - n;
+            for (size_type i = 0; i < n; i++)
+            {
+                _data_allocator.destroy(first + i);
+            }
+            for (size_type i = 0; i < left_len; i++)
+            {
+                _data_allocator.construct(first + i, *(last + i));
+                _data_allocator.destroy(last + i);
+            }
+            //_data_allocator.destroy(_finish);
+            --_size;
+            --_finish;
 		}
 
         void swap (vector& x)
         {
-			std::swap(_first, x._first);
-			std::swap(_size, x._size);
-			std::swap(_capacity, x._capacity);
-			std::swap(_data_allocator, x._data_allocator);
+            size_type temp_size;
+            pointer temp_point;
+            allocator_type temp_allocator;
 
+            temp_point = _start;
+            _start = x._start;
+            x._start = temp_point;
+
+            temp_point = _finish;
+            _finish = x._finish;
+            x._finish = temp_point;
+			
+            temp_size = _size;
+            _size = x._size;
+            x.size = temp_size;
+			
+            temp_size = _capacity;
+            _capacity = x._capacity;
+            x.size = temp_size;
+
+            temp_allocator = _data_allocator;
+            _data_allocator = x._data_allocator;
+            x._data_allocator = temp_allocator;
 		}
 
         void clear()
@@ -584,6 +648,73 @@ Allocator:
             _size = 0;
         }
     };
+    
+    template <typename T, typename Alloc>
+	bool operator== (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+		if (lhs.size() != rhs.size())
+        {
+			return false;
+        }
+		for (size_t i = 0; i < rhs.size(); i++)
+        {
+			if (lhs[i] != rhs[i])
+            {
+				return false;
+            }
+        }
+		return true;
+	}
+
+	template <typename T, typename Alloc>
+	bool operator!= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+		return !(lhs == rhs);
+	}
+
+	template <typename T, typename Alloc>
+	bool operator< (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+        if (lhs.size() < rhs.size())
+        {
+			return true;
+        }
+        else if (lhs.size() > rhs.size())
+        {
+            return false;
+        }
+		for (size_t i = 0; i < rhs.size(); i++)
+        {
+			if (lhs[i] != rhs[i])
+            {
+                if (lhs[i] < rhs[i])
+                {
+                    return true;
+                }
+				return false;
+            }
+        }
+		return false;
+	}
+	
+	template <typename T, typename Alloc >
+	bool operator<= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+		return !(lhs > rhs);
+	}
+	
+	template <typename T, typename Alloc >
+	bool operator> (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+		return rhs < lhs;
+	}
+
+	template <typename T, typename Alloc >
+	bool operator>= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+		return !(lhs < rhs);
+	}
+
 }
 
 

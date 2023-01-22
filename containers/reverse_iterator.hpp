@@ -10,7 +10,7 @@ namespace ft
     class Reverse_iterator : Base_iterator<iter>
     {
     public:
-        typedef typename ft::Reverse_iterator iterator_category;
+        typedef typename ft::iterator_traits<iter>::iterator_category iterator_category;
         typedef typename ft::iterator_traits<iter>::difference_type difference_type;
         typedef typename ft::iterator_traits<iter>::value_type value_type;
         typedef iter*  pointer;
@@ -22,11 +22,11 @@ namespace ft
         Reverse_iterator() {}
         // 인자 : 반복자.
         explicit Reverse_iterator(iter x)
-        : origin_iter(x) {}
+        : _origin_iter(x) {}
         // 복사생성자
         template<class T>
         Reverse_iterator(const Reverse_iterator<T>& x)
-        : origin_iter(x.origin_iter) {}
+        : _origin_iter(x.origin_iter) {}
 
         iter base()
         {

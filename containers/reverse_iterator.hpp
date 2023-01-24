@@ -2,19 +2,19 @@
 # define REVERSE_ITERATOR_HPP
 
 #include "./base_iterator.hpp"
-#include "../utils/traits.hpp"
+#include "./traits.hpp"
 
 namespace ft
 {
     template <typename iter>
-    class Reverse_iterator : Base_iterator<iter>
+    class Reverse_iterator
     {
     public:
         typedef typename ft::iterator_traits<iter>::iterator_category iterator_category;
         typedef typename ft::iterator_traits<iter>::difference_type difference_type;
         typedef typename ft::iterator_traits<iter>::value_type value_type;
-        typedef iter*  pointer;
-        typedef iter&  reference;
+		typedef typename ft::iterator_traits<iter>::pointer pointer;
+		typedef typename ft::iterator_traits<iter>::reference reference;
     private:
         iter _origin_iter;
     public:
@@ -26,23 +26,25 @@ namespace ft
         // 복사생성자
         template<class T>
         Reverse_iterator(const Reverse_iterator<T>& x)
-        : _origin_iter(x.origin_iter) {}
+        : _origin_iter(x.base()) {}
 
-        iter base()
+        iter base() const
         {
             return _origin_iter;
         }
         
         reference operator*() const
         {
-            iter temp_iter = _origin_iter;
-            return (*(--temp_iter));
+            // //iter temp_iter = _origin_iter;
+            // return (*(_origin_iter - 1));
+            iter tmp = _origin_iter;
+            return *(--tmp);
         }
 
         pointer operator->() const
         {
-            iter temp_iter = _origin_iter;
-            return --temp_iter;
+            //iter temp_iter = _origin_iter;
+            return _origin_iter - 1;
         }
 
         reference operator[] (difference_type n) const
@@ -59,7 +61,7 @@ namespace ft
 		Reverse_iterator operator++(int) // 복사본을 던져주므로 레퍼런스 아님.
 		{
 			Reverse_iterator temp_riter = *this;
-			--_origin_iter;
+			--temp_riter;
 			return temp_riter;	
 		}
 
@@ -88,7 +90,7 @@ namespace ft
             return temp_riter;
         }
 
-        Reverse_iterator operator-(difference_type n)
+        Reverse_iterator operator-(difference_type n) const
         {
             return Reverse_iterator(_origin_iter + n);
         }

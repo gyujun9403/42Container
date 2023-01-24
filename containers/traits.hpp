@@ -1,6 +1,8 @@
 #ifndef TRAITS_HPP
 # define TRAITS_HPP
 
+#include <cstddef>
+
 namespace ft
 {
     // 빈 클래스들.

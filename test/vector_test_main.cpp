@@ -2,8 +2,8 @@
 
 int main()
 {
-    ft::vector<int> vec;
-    ft::vector<int> vec1(10, 5);
+    ft::Vector<int> vec();
+    ft::Vector<int> vec1(10, 5);
     size_t vec_size1 = vec1.size();
     size_t vec_csize1 = vec1.capacity();
     vec1.resize(3);

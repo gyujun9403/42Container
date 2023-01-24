@@ -7,7 +7,7 @@
 
 #include "./random_access_iterator.hpp"
 #include "./reverse_iterator.hpp"
-#include "../utils/utils.hpp"
+#include "./utils.hpp"
 
 namespace ft
 {
@@ -21,14 +21,16 @@ namespace ft
         typedef          T value_type;
         typedef          Alloc allocator_type;
         typedef typename allocator_type::pointer pointer;
+        typedef typename allocator_type::const_pointer const_pointer;
         typedef          std::size_t size_type;
         typedef          std::ptrdiff_t difference_type;
 
-        typedef          value_type reference;
-        typedef          const value_type const_reference;
+        typedef          value_type& reference; //FIX!!
+        typedef          const value_type& const_reference;
 
         typedef          Random_access_iterator<value_type> iterator;
-        typedef          const Random_access_iterator<value_type> const_iterator;
+        //typedef          const Random_access_iterator<value_type> const_iterator; FIX!!!!
+        typedef          Random_access_iterator<const value_type> const_iterator;
         typedef          Reverse_iterator<const_iterator> const_reverse_iterator;
 		typedef          Reverse_iterator<iterator> reverse_iterator;
 
@@ -66,7 +68,6 @@ namespace ft
         : _data_allocator(alloc), _size(n), _capacity(n)
         {
             // 할당 크기 n만 들어오거나, val을 n개 채우는 경우.
-            size_type val_size = sizeof(val);
             _start = _data_allocator.allocate(n);
             for (size_type i = 0; i < n; i++)
             {
@@ -96,7 +97,7 @@ namespace ft
         }
 
         vector (const vector& x)
-        : _size(0), _capacity(0), _data_allocator(x._data_allocator)
+        : _data_allocator(x._data_allocator) , _start(0), _size(0), _capacity(0)
         {
             operator=(x);
         }
@@ -129,6 +130,7 @@ namespace ft
             _size = x._size;
             _capacity = _size;
             _finish = _start + _size;
+            return *this;
         }
 
 // 제공 함수들
@@ -256,7 +258,7 @@ Allocator:
                 size_type new_size = this->_size;
                 //_end_capacity = _start + n;
                 //_end = _start;
-                for (int i = 0; i < new_size; i++)
+                for (size_type i = 0; i < new_size; i++)
                 {
                     this->_data_allocator.construct(new_start + i, *this->_start);
                 }
@@ -375,7 +377,7 @@ Allocator:
             this->resize(size);
             for (size_type i = 0; i < size; i++)
             {
-                _data_allocator.construct(_start + i, *first);
+                _data_allocator.construct(_start + i, *(first + i));
             }
         }
 
@@ -436,7 +438,7 @@ Allocator:
                     _data_allocator.construct(new_start + i, *(_start + i));
                 }
                 // 삽입자리에 생성
-				_data_allocator.construct(new_start + _start, val);
+				_data_allocator.construct(new_start + pos_len, val);
                 // 삽입 뒤에  복사
                 for (size_type i = pos_len; i + 1 < target_len; i++)
                 {
@@ -476,8 +478,8 @@ Allocator:
             {
 				throw std::length_error("vector"); // TODO
             }
-			size_type pos_len = static_cast<size_type>(position - _start);
-            size_type left_len = static_cast<size_type>(_finish - position);
+			size_type pos_len = static_cast<size_type>(&(*position) - _start);
+            size_type left_len = static_cast<size_type>(_finish - &(*position));
             // 새 공간 할당해야할 때
 			if (_size + n > _capacity)
             {
@@ -495,9 +497,9 @@ Allocator:
                     _data_allocator.construct(temp_start + i, val);
                 }
                 // 이후 
-                for (int i = 0; i < left_len; i++)
+                for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(temp_start + position + i, *(_start + position + i));
+                    _data_allocator.construct(&(*position) + i, *(&(*position) + i));
                 }
 				for (size_type i = 0; i < _size; i++)
                 {
@@ -507,7 +509,7 @@ Allocator:
 				_size += n;
 				_capacity = new_capacity;
 				_start = new_start;
-                _finish = new_start + size;
+                _finish = new_start + _size;
 			}
             // 공간할당 필요 없음
 			else
@@ -515,12 +517,12 @@ Allocator:
                 // 맨 끝부분 부터 넣어야함.
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(_finish + n + i, *(position + n + i));
-                    _data_allocator.destroy(position + n + i);
+                    _data_allocator.construct(_finish + n + i, *(&(*position) + n + i));
+                    _data_allocator.destroy(&(*position) + n + i);
                 }
                 for (size_type i = 0; i < n; i++)
                 {
-                    _data_allocator.construct(position + i, val);
+                    _data_allocator.construct(&(*position) + i, val);
                 }
 				_size += n;
                 _finish += n;
@@ -532,9 +534,9 @@ Allocator:
         void insert (iterator position, InputIterator first, InputIterator last)
         {
 
-			if (position < begin() || position > end() || first > last)
+			if (&(*position) < _start || &(*position) > _finish || first > last)
 				throw std::logic_error("vector");
-			size_type pos_len = static_cast<size_type>(position - begin());
+			size_type pos_len = static_cast<size_type>(&(*position) - _start);
             size_type n = static_cast<size_type>(last - first);
 			size_type left_len = _size - pos_len;
 			if (_size + n > _capacity)
@@ -546,7 +548,7 @@ Allocator:
                     _data_allocator.construct(new_start + i, *(_start + i));
                 }
                 // try catch???
-                for (size_type i = 0; i < n; i)
+                for (size_type i = 0; i < n; i++)
                 {
                     _data_allocator.construct(new_start + pos_len + i, *(_start + i));
                 }
@@ -567,12 +569,12 @@ Allocator:
             {
 				for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(_finish + i, *(position + i));
-					_data_allocator.destroy(position + i);
+                    _data_allocator.construct(_finish + i, *(&(*position) + i));
+					_data_allocator.destroy(&(*position) + i);
 				}
 				for (size_type i = 0; i < n; i++)
                 {
-					_data_allocator.construct(position + i, first + i);
+					_data_allocator.construct(&(*position) + i, *(first + i));
 				}
 				_size += n;
                 _finish += n;
@@ -581,15 +583,16 @@ Allocator:
 
         iterator erase (iterator position)
         {
-            size_type left_len = _finish - position;
-            _data_allocator.destroy(position);
+            size_type left_len = _finish - &(*position);
+            _data_allocator.destroy(&(*position));
             for (size_type i = 0; i < left_len - 1 ; i++)
             {
-                _data_allocator.construct(position + i, *(position + i + 1));
-                _data_allocator.destroy(position + i + 1);
+                _data_allocator.construct(&(*position) + i, *(&(*position) + i + 1));
+                _data_allocator.destroy(&(*position) + i + 1);
             }
             --_size;
             --_finish;
+            return &(*position);
 		}
 
 
@@ -599,16 +602,17 @@ Allocator:
             size_type left_len = _size - n;
             for (size_type i = 0; i < n; i++)
             {
-                _data_allocator.destroy(first + i);
+                _data_allocator.destroy(&(*first) + i);
             }
             for (size_type i = 0; i < left_len; i++)
             {
-                _data_allocator.construct(first + i, *(last + i));
-                _data_allocator.destroy(last + i);
+                _data_allocator.construct(&(*first) + i, *(&(*last) + i));
+                _data_allocator.destroy(&(*last) + i);
             }
             //_data_allocator.destroy(_finish);
             --_size;
             --_finish;
+            return &(*first);
 		}
 
         void swap (vector& x)
@@ -627,11 +631,11 @@ Allocator:
 			
             temp_size = _size;
             _size = x._size;
-            x.size = temp_size;
+            x._size = temp_size;
 			
             temp_size = _capacity;
             _capacity = x._capacity;
-            x.size = temp_size;
+            x._size = temp_size;
 
             temp_allocator = _data_allocator;
             _data_allocator = x._data_allocator;

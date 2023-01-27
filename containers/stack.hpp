@@ -5,88 +5,105 @@
 
 namespace ft
 {
-    template<typename T, typename Container = ft::vector<T> >
+    template <typename Tp, typename Seqainer = ft::vector<Tp> >
     class stack
     {
     public:
         // for iterator_trains
-        typedef          T value_type;
-        typedef typename Container::allocator_type allocator_type;
-        typedef typename Container::pointer pointer;
-        typedef typename Container::const_pointer const_pointer;
-        typedef typename Container::size_type size_type;
-        typedef typename Container::difference_type difference_type;
-
-        typedef          value_type& reference; //FIX!!
-        typedef          const value_type& const_reference;
-
+		typedef			 Seqainer container_type;
+        typedef typename container_type::value_type value_type;
+        typedef typename container_type::size_type size_type;
+        typedef typename container_type::reference reference;
+        typedef typename container_type::const_reference const_reference;
         // stack은 반복자가 없다.
         // typedef          Random_access_iterator<value_type> iterator;
         // //typedef          const Random_access_iterator<value_type> const_iterator; FIX!!!!
         // typedef          Random_access_iterator<const value_type> const_iterator;
         // typedef          Reverse_iterator<const_iterator> const_reverse_iterator;
 		// typedef          Reverse_iterator<iterator> reverse_iterator;
+	private:
+		Container _c;
 
-        explicit stack (const container_type& cont = container_type()) : _container(cont){}
+	public:
+        explicit stack (const container_type& c = container_type())
+		: _c(c) {}
 	
-	stack(const stack& other): _container(other._container) {}
+		stack(const stack& other)
+		: _c(other._c) {}
 
-	stack& operator=(const stack& other){
-		_container = other._container;
-		return (*this);
-	}
+		stack& operator=(const stack& other)
+		{
+			_c = other._c;
+			return *this;
+		}
 
-	bool empty() const{
-		return (_container.empty());
-	}
+		bool empty() const
+		{
+			return _c.empty();
+		}
 
-	size_type size() const{
-		return (_container.size());
-	}
+		size_type size() const
+		{
+			return _c.size();
+		}
 
-	value_type& top(){
-		return (_container.back());
-	}
+		value_type& top()
+		{
+			return _c.back();
+		}
 
-	const value_type& top() const{
-		return (_container.back());
-	}
+		const value_type& top() const
+		{
+			return _c.back();
+		}
 
-	void push (const value_type& val){
-		_container.push_back(val);
-	}
+		void push (const value_type& val)
+		{
+			_c.push_back(val);
+		}
 
-	void pop(){
-		_container.pop_back();
-	}
+		void pop()
+		{
+			_c.pop_back();
+		}
 
 	};
 
-	template <class A, class Cont>
-	bool operator== (const stack<A,Cont>& lhs, const stack<A,Cont>& rhs){
-				return(lhs._container == rhs._container);
-			 }
-	template <class A, class Cont>
-	bool operator!= (const stack<A,Cont>& lhs, const stack<A,Cont>& rhs){
-				return(lhs._container != rhs._container);
-			 }
-	template <class A, class Cont>
-	bool operator<  (const stack<A,Cont>& lhs, const stack<A,Cont>& rhs){
-				return(lhs._container < rhs._container);
-			 }
-	template <class A, class Cont>
-	bool operator<= (const stack<A,Cont>& lhs, const stack<A,Cont>& rhs){
-				return(lhs._container <= rhs._container);
-		  }
-	template <class A, class Cont>
-	bool operator>  (const stack<A,Cont>& lhs, const stack<A,Cont>& rhs){
-				return(lhs._container > rhs._container);
-		  }
-	template <class A, class Cont>
-	bool operator>= (const stack<A,Cont>& lhs, const stack<A,Cont>& rhs){
-				return(lhs._container >= rhs._container);
-			}
+	template <typename Tp, typename Seq>
+	bool operator==(const stack<Tp, Seq>& lhs, const stack<Tp, Seq>& rhs)
+	{
+		return lhs._c == rhs._c;
+	}
 
+	template <typename Tp, typename Seq>
+	bool operator!=(const stack<Tp, Seq>& lhs, const stack<Tp, Seq>& rhs)
+	{
+		return lhs._c != rhs._c;
+	}
+
+	template <typename Tp, typename Seq>
+	bool operator<(const stack<Tp, Seq>& lhs, const stack<Tp, Seq>& rhs)
+	{
+		return lhs._c < rhs._c;
+	}
+
+	template <typename Tp, typename Seq>
+	bool operator<=(const stack<Tp, Seq>& lhs, const stack<Tp, Seq>& rhs)
+	{
+		return lhs._c <= rhs._c;
+	}
+
+	template <typename Tp, typename Seq>
+	bool operator>(const stack<Tp, Seq>& lhs, const stack<Tp, Seq>& rhs)
+	{
+		return lhs._c > rhs._c;
+	}
+
+	template <typename Tp, typename Seq>
+	bool operator>=(const stack<Tp, Seq>& lhs, const stack<Tp, Seq>& rhs)
+	{
+		return lhs._c >= rhs._c;
+	}
 }
 
 #endif

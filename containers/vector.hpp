@@ -51,8 +51,8 @@ namespace ft
         fill (2)	
             explicit vector (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type());
         range (3)	
-            template <class InputIterator>
-            vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type());
+            template <class InputIt>
+            vector (InputIt first, InputIt last, const allocator_type& alloc = allocator_type());
         copy (4)	
             vector (const vector& x);
         */
@@ -81,9 +81,9 @@ namespace ft
 
         // 이건 enable_if를 쓰니 그거 참고하기.
         // range
-        template <typename InputIterator>
-        vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(), 
-            typename ft::enable_if<!is_integral<InputIterator>::value, InputIterator>::type* = 0)
+        template <typename InputIt>
+        vector (InputIt first, InputIt last, const allocator_type& alloc = allocator_type(), 
+            typename ft::enable_if<!is_integral<InputIt>::value, InputIt>::type* = 0)
         : _data_allocator(alloc)
         {
             // if the range specified by [first,last) is not valid, it causes undefined behavior.
@@ -364,9 +364,9 @@ Allocator:
         }
 
         /*************[modifiers]*************/
-        template <typename InputIterator>
-        void assign (InputIterator first, InputIterator last,
-            typename enable_if<!is_integral<InputIterator>::value, InputIterator>::type* = 0)
+        template <typename InputIt>
+        void assign (InputIt first, InputIt last,
+            typename enable_if<!is_integral<InputIt>::value, InputIt>::type* = 0)
         {
             if(first > last)
             {
@@ -530,8 +530,8 @@ Allocator:
 		}
 
 
-        template <class InputIterator>
-        void insert (iterator position, InputIterator first, InputIterator last)
+        template <class InputIt>
+        void insert (iterator position, InputIt first, InputIt last)
         {
 
 			if (&(*position) < _start || &(*position) > _finish || first > last)

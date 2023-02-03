@@ -44,7 +44,7 @@ namespace ft
             {
                 return (*this);
             }
-            this->_ptr = op._ptr; // _ptr이 뭐든간에 =가 정의되어 있어야함.
+            _ptr = op.base(); // _ptr이 뭐든간에 =가 정의되어 있어야함.
             return (*this); // 반복자원본반환. 반환자도 참조형.
         }
         // 포인터 연산자. 원소 반환.

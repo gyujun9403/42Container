@@ -72,6 +72,59 @@ namespace ft
         typedef T type;
     };
 
+
+    /*
+    ** Base class for standard binary function objects.
+    ** (Doc = http://www.cplusplus.com/reference/functional/binary_function/?kw=binary_function)
+    ** It have no operator "()" like functin objects, 
+    ** it is up to the class deriving from it to define it.
+    ** It just has 3 public data memebers that are typedefs of the
+    ** template parameters.
+    ** (the operator "()", permet to use a class with the same syntax
+    ** as a function call).
+    */
+    template <typename Arg1, typename Arg2, typename Result>
+    struct binary_function
+    {
+        typedef Arg1 first_argument_type;
+        typedef Arg2 second_argument_type;
+        typedef Result result_type;
+    };
+
+    /*
+    ** A binary function object class who will return
+    ** whether the first arguement compares less than the second.
+    ** (using "<" operator).
+    */
+    template <typename T>
+    struct less : binary_function<T, T, bool>
+    {
+        bool operator() (const T& x, const T& y) const { return (x < y); }
+    };
+
+    long long max(long long a, long long b)
+    {
+        if (a > b)
+        {
+            return a;
+        }
+        else
+        {
+            return b;
+        }
+    }
+
+    long long min(long long a, long long b)
+    {
+        if (a > b)
+        {
+            return b;
+        }
+        else
+        {
+            return a;
+        }
+    }
 }
 
 #endif

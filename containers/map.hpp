@@ -17,24 +17,31 @@ namespace ft
     // for iterator_trains
         typedef          Key key_type;
         typedef          T mapped_type;
-        typedef          ft::pair<const Key, T> value_type;
-        typedef          std::size_t size_type;
-        typedef          std::ptrdiff_t difference_type;
+        // typedef          ft::pair<const Key, T> value_type;
+        // typedef          std::size_t size_type;
+        // typedef          std::ptrdiff_t difference_type;
         typedef          Compare key_compare;
         typedef          Allocator allocator_type; // pair<const Key, T>
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-        typedef typename ft::avl_tree<Key, T, Compare, Allocator>::node_type node_type;
-        typedef typename ft::avl_tree<Key, T, Compare, Allocator>::node_pointer node_pointer;
+        typedef typename ft::avl_tree<Key, T, Compare, Allocator> tree_type;
+        //typedef typename tree_type::node_type node_type;
+        typedef typename tree_type::value_type value_type; //node<T_key, T_val>
+        typedef          value_type node_type;
+        typedef typename tree_type::size_type size_type;
+        typedef typename tree_type::difference_type difference_type;
+        // typedef typename tree_type::pointer pointer;
+        // typedef typename tree_type::const_pointer const_pointer;
+        typedef pointer node_pointer;
 
         typedef          value_type& reference; //FIX!!
         typedef          const value_type& const_reference;
 
-        typedef          Bidirectional_iterator_avl<node_type, Compare> iterator;
+        typedef typename tree_type::iterator iterator;
         //typedef          const Random_access_iterator<value_type> const_iterator; FIX!!!!
-        typedef          Bidirectional_iterator_avl<const node_type, Compare> const_iterator;
-        typedef          Reverse_iterator<const_iterator> const_reverse_iterator;
-		typedef          Reverse_iterator<iterator> reverse_iterator;
+        typedef typename tree_type::const_iterator const_iterator;
+		typedef typename tree_type::reverse_iterator reverse_iterator;
+        typedef typename tree_type::const_reverse_iterator const_reverse_iterator;
 
     private:
         // 사용법?
@@ -195,7 +202,7 @@ namespace ft
             {
                 rt_bool = true;
             }
-            return ft::make_pair<iterator, bool>(iterator(rt_ptr), rt_bool);
+            return ft::make_pair<iterator, bool>(iterator(&(*rt_ptr)), rt_bool);
         }
 
         template< class InputIt >

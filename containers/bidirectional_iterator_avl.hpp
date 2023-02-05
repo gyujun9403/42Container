@@ -8,17 +8,16 @@
 
 namespace ft
 {
-    template <typename T, typename Compare>
+    template <typename T, typename Compare> // T : node<T_key, T_val>
     class Bidirectional_iterator_avl : Base_iterator<T>
     {
     public:
         typedef typename ft::Bidirectional_iterator_tag iterator_category;
-        typedef typename ft::iterator_traits<T*>::difference_type difference_type;
+        typedef typename ft::iterator_traits<T*>::difference_type difference_type; // FIX!
         typedef typename ft::iterator_traits<T*>::value_type value_type;
-        typedef typename ft::iterator_traits<T*>::pointer pointer;
-        typedef          T* node_pointer;
-        
-        typedef typename ft::iterator_traits<T*>::reference reference;
+        typedef typename ft::iterator_traits<T*>::pointer node_pointer; // FIX! 이걸 쌩으로 T*, T&으로 쓰면
+        typedef typename ft::iterator_traits<T*>::reference node_reference;
+        //typedef typename ft::iterator_traits<T*>::size_type size_type;
     private:
         node_pointer _node;
         Compare _comp;
@@ -31,7 +30,7 @@ namespace ft
         Bidirectional_iterator_avl(const Bidirectional_iterator_avl<typename ft::remove_const<value_type>::type, Compare>& other)
         : _node(other.base()), _comp() {}
 
-        pointer base() const
+        node_pointer base() const
         {
             return (_node);
         }
@@ -49,12 +48,12 @@ namespace ft
             return *this;
         }
 
-        reference operator*(void) const
+        node_reference operator*(void) const
         {
             return _node->data; //node::data (ft::pair<const T_key, T_val> 타입)
         }
 
-        pointer operator->(void) const
+        node_pointer operator->(void) const
         {
             return &_node->data;
         }

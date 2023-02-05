@@ -10,6 +10,7 @@ namespace ft
     class node
     {
     public:
+    
         ft::pair<const T_key, T_val> data;
         node* parents;
         node* child_left;

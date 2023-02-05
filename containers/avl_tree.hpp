@@ -8,6 +8,8 @@
 #include "utils.hpp"
 #include "pair.hpp"
 #include "node.hpp"
+#include "bidirectional_iterator_avl.hpp"
+#include "reverse_iterator.hpp"
 #define LEFT 0
 #define RIGHT 1
 
@@ -18,24 +20,37 @@ namespace ft
     template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator<ft::node<T_key, T_val> > >
     class avl_tree // : public ITree<T_key, T_val, Alloc>
     {
-    public:
         typedef node<T_key, T_val> node_type;
         typedef node<T_key, T_val>* node_pointer;
         typedef node<T_key, T_val>& node_reference;
+    public:
+        //typedef typename T* pointer;
+        typedef ft::pair<T_key, T_val> value_type;
+        typedef node_pointer pointer;
+        typedef const node_pointer const_pointer;
+        typedef node_reference reference;
+        typedef typename std::size_t size_type;
+        typedef typename std::ptrdiff_t difference_type;
         typedef Compare value_compare;
         typedef Alloc allocator_type;
+        typedef Bidirectional_iterator_avl<node_type, Compare> iterator;
+		typedef Bidirectional_iterator_avl<const node_type, Compare> const_iterator;
+		typedef	ft::Reverse_iterator<iterator> reverse_iterator;
+		typedef	ft::Reverse_iterator<const_iterator> const_reverse_iterator;
+        typedef typename Alloc::template rebind<node_type>::other node_allocator;
     public: // TODO: for debug
         node_pointer _root;
         size_t _size;
-        allocator_type _data_allocator; 
+        //allocator_type _node_allocator;
+        node_allocator _node_allocator;
         value_compare _compare;
 
     private:
         node_pointer make_node(T_key& key, T_val& value)
         {
-            node_pointer rt = _data_allocator.allocate(1);
-            //_data_allocator.construct(rt, ft::make_pair<const T_key, T_val>(key, value));
-            _data_allocator.construct(rt, ft::node<T_key, T_val>(make_pair<const T_key, T_val>(key, value)));
+            node_pointer rt = _node_allocator.allocate(1);
+            //_node_allocator.construct(rt, ft::make_pair<const T_key, T_val>(key, value));
+            _node_allocator.construct(rt, ft::node<T_key, T_val>(make_pair<const T_key, T_val>(key, value)));
             return rt;
         }
 
@@ -128,8 +143,8 @@ namespace ft
             }
             recur_postorder_clear(ptr_node->child_left);
             recur_postorder_clear(ptr_node->child_right);
-            _data_allocator.destroy(ptr_node);
-            _data_allocator.deallocate(ptr_node, 1);
+            _node_allocator.destroy(ptr_node);
+            _node_allocator.deallocate(ptr_node, 1);
         }
 
         void rotate_r(node_pointer x)
@@ -251,7 +266,7 @@ namespace ft
 
     public:
         avl_tree (const Compare& comp = Compare(), const allocator_type& alloc = allocator_type())
-        : _root(NULL), _size(0), _data_allocator(alloc), _compare(comp) {}
+        : _root(NULL), _size(0), _node_allocator(alloc), _compare(comp) {}
 
         ~avl_tree ()
         {
@@ -352,8 +367,8 @@ namespace ft
             // 없앨 노드가 가지고 있는 좌우 붙여주기
             connect_node(substitute_node, ptr_node->child_left, LEFT);
             connect_node(substitute_node, ptr_node->child_right, RIGHT);
-            _data_allocator.destroy(ptr_node);
-            _data_allocator.deallocate(ptr_node, 1);
+            _node_allocator.destroy(ptr_node);
+            _node_allocator.deallocate(ptr_node, 1);
             //renewal_heights(_root);
             renewal_heights();
             recur_set_balace(_root);

@@ -25,7 +25,7 @@ namespace ft
         typedef node<T_key, T_val>& node_reference;
     public:
         //typedef typename T* pointer;
-        typedef ft::pair<T_key, T_val> value_type;
+        typedef ft::pair<const T_key, T_val> value_type;
         typedef node_pointer pointer;
         typedef const node_pointer const_pointer;
         typedef node_reference reference;

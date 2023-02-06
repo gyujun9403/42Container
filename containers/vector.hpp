@@ -87,12 +87,23 @@ namespace ft
         : _data_allocator(alloc)
         {
             // if the range specified by [first,last) is not valid, it causes undefined behavior.
-            _size = last - first;
+            //_size = last - first;
+            difference_type n = ft::distance(first, last);
+            if (n < 0)
+            {
+                throw std::length_error("vector");
+            }
+            else
+            {
+                _size = n;
+            }
             _capacity = _size;
             _start = _data_allocator.allocate(_capacity);
-            for (size_type i = 0; i < _size; i++)
+            _finish = _start;
+            while (n--)
             {
-                _data_allocator.construct(_start + i, *(first + i));
+                _data_allocator.construct(_finish, *(first++));
+                _finish++;
             }
         }
 
@@ -193,15 +204,15 @@ Allocator:
             {
                 throw (std::length_error("vector::resize"));
             }
-            else if(n < this->_size)
+            else if(n < _size)
             {
-                for (size_type i = n; i < this->_size ; i++)
+                for (size_type i = n; i < _size ; i++)
                 {
-                    _data_allocator.destroy(--_finish);
+                    _data_allocator.destroy(_finish--);
                 }
                 _size = n;
             }
-            else if (n > this->size())
+            else if (n > _size)
             {
                 if (this->_capacity < n)
                 {
@@ -368,31 +379,42 @@ Allocator:
         void assign (InputIt first, InputIt last,
             typename enable_if<!is_integral<InputIt>::value, InputIt>::type* = 0)
         {
-            if(first > last)
+            difference_type n = ft::distance(first, last);
+            if (n < 0)
             {
-                throw std::logic_error("vector"); // TODO
+                throw std::length_error("vector");
             }
-            size_type size = static_cast<size_type>(last - first);
-            this->clear();
-            this->resize(size);
-            for (size_type i = 0; i < size; i++)
+            else
             {
-                _data_allocator.construct(_start + i, *(first + i));
+                _size = n;
+            }
+            // if(first > last)
+            // {
+            //     throw std::logic_error("vector"); // TODO
+            // }
+            // size_type size = static_cast<size_type>(last - first);
+            this->clear();
+            this->resize(n);
+            while (n--)
+            {
+                _data_allocator.construct(_finish, *(first++));
+                _finish++;
             }
         }
 
         void assign (size_type n, const value_type& val)
         {
-			clear();
+			this->clear();
 			if (n > _capacity)
             {
                 this->resize(n);
 			}
 			for (size_type i = 0; i < n; i++)
             {
-				_data_allocator.construct(_start + i, val);
+				_data_allocator.construct(_finish, val);
+                _finish++;
             }
-
+            _size = n;
 		}
 
         void push_back (const value_type& val)
@@ -533,11 +555,10 @@ Allocator:
         template <class InputIt>
         void insert (iterator position, InputIt first, InputIt last)
         {
-
-			if (&(*position) < _start || &(*position) > _finish || first > last)
+			if (&(*position) < _start || &(*position) > _finish || ft::distance(first, last) < 0)
 				throw std::logic_error("vector");
 			size_type pos_len = static_cast<size_type>(&(*position) - _start);
-            size_type n = static_cast<size_type>(last - first);
+            size_type n = static_cast<size_type>(ft::distance(first, last));
 			size_type left_len = _size - pos_len;
 			if (_size + n > _capacity)
             {
@@ -574,7 +595,7 @@ Allocator:
 				}
 				for (size_type i = 0; i < n; i++)
                 {
-					_data_allocator.construct(&(*position) + i, *(first + i));
+					_data_allocator.construct(&(*position) + i, *(first++));
 				}
 				_size += n;
                 _finish += n;

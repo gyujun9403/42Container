@@ -71,7 +71,28 @@ namespace ft
     {
         typedef T type;
     };
-
+    
+    /*
+    ** @brief Give a difference_type defined in ft::iterator_traits
+    ** that's the difference of address in memory
+    ** between last and first iterator.
+    **
+    ** @param first The first iterator.
+    ** @param last The last iterator.
+    ** @return The difference.
+    */
+    template<class InputIterator>
+        typename ft::iterator_traits<InputIterator>::difference_type
+            distance (InputIterator first, InputIterator last)
+        {
+            typename ft::iterator_traits<InputIterator>::difference_type rtn = 0;
+            while (first != last)
+            {
+                first++;
+                rtn++;
+            }
+            return (rtn);
+        }
 
     /*
     ** Base class for standard binary function objects.

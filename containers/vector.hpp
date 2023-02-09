@@ -552,8 +552,8 @@ Allocator:
 		}
 
 
-        template <class InputIt>
-        void insert (iterator position, InputIt first, InputIt last)
+        template <class InputIt> // enable_if없으면 void insert (iterator position, size_type n, const value_type& val)랑 구분 못함.
+        void insert (iterator position, InputIt first, InputIt last, typename enable_if<!is_integral<InputIt>::value>::type* = 0)
         {
 			if (&(*position) < _start || &(*position) > _finish || ft::distance(first, last) < 0)
 				throw std::logic_error("vector");

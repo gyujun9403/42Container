@@ -1,6 +1,8 @@
 #ifndef UTILLS_HPP
 # define UTILLS_HPP
 
+#include "traits.hpp"
+
 namespace ft
 {
     // v값에 따라 서로 다른 구조체를 만들어주는 탬플릿

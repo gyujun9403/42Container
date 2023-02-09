@@ -17,24 +17,26 @@
 
 namespace ft
 {
-    template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator<ft::node<T_key, T_val> > >
+    template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator< ft::node<ft::pair<T_key, T_val> > > >
     class avl_tree // : public ITree<T_key, T_val, Alloc>
     {
-        typedef node<T_key, T_val> node_type;
-        typedef node<T_key, T_val>* node_pointer;
-        typedef node<T_key, T_val>& node_reference;
     public:
+
+        typedef node<ft::pair<T_key, T_val> > node_type;
+        typedef node<ft::pair<T_key, T_val> >* node_pointer;
+        typedef node<ft::pair<T_key, T_val> >& node_reference;
         //typedef typename T* pointer;
-        typedef ft::pair<const T_key, T_val> value_type;
-        typedef node_pointer pointer;
-        typedef const node_pointer const_pointer;
-        typedef node_reference reference;
-        typedef typename std::size_t size_type;
         typedef typename std::ptrdiff_t difference_type;
+        typedef ft::pair<const T_key, T_val> value_type;
+        typedef ft::pair<const T_key, T_val>* pointer;
+        typedef ft::pair<const T_key, T_val>& reference;
+        typedef const node_pointer const_node_pointer;
+        typedef const pointer const_pointer;
+        typedef typename std::size_t size_type;
         typedef Compare value_compare;
         typedef Alloc allocator_type;
-        typedef Bidirectional_iterator_avl<node_type, Compare> iterator;
-		typedef Bidirectional_iterator_avl<const node_type, Compare> const_iterator;
+        typedef Bidirectional_iterator_avl<value_type, Compare> iterator;
+		typedef Bidirectional_iterator_avl<const value_type, Compare> const_iterator;
 		typedef	ft::Reverse_iterator<iterator> reverse_iterator;
 		typedef	ft::Reverse_iterator<const_iterator> const_reverse_iterator;
         typedef typename Alloc::template rebind<node_type>::other node_allocator;
@@ -50,7 +52,7 @@ namespace ft
         {
             node_pointer rt = _node_allocator.allocate(1);
             //_node_allocator.construct(rt, ft::make_pair<const T_key, T_val>(key, value));
-            _node_allocator.construct(rt, ft::node<T_key, T_val>(make_pair<const T_key, T_val>(key, value)));
+            _node_allocator.construct(rt, ft::node<ft::pair<T_key, T_val> >(make_pair<const T_key, T_val>(key, value)));
             return rt;
         }
 
@@ -322,7 +324,7 @@ namespace ft
                 }
             }
             ++_size;
-            print2D(_root);
+            //print2D(_root);
             return now_node;
         }
 
@@ -373,7 +375,7 @@ namespace ft
             renewal_heights();
             recur_set_balace(_root);
             --_size;
-            print2D(_root);
+            //print2D(_root);
             return ;
         }
 
@@ -426,7 +428,26 @@ namespace ft
             }
         }
 
-        node_pointer get_min_node()
+        // node_pointer get_min_node() const
+        // //node_reference get_min_node()
+        // {
+        //     node_pointer now_node = _root;
+        //     if (_root == NULL)
+        //     {
+        //         return NULL;
+        //     }
+        //     while (1)
+        //     {
+        //         if (now_node->child_left == NULL)
+        //         {
+        //             break ;
+        //         }
+        //     }
+        //     return (now_node);
+        // }
+
+        iterator get_min_iter() const
+        //node_reference get_min_node()
         {
             node_pointer now_node = _root;
             if (_root == NULL)
@@ -440,10 +461,29 @@ namespace ft
                     break ;
                 }
             }
-            return now_node;
+            return iterator(now_node);
         }
 
-        node_pointer get_max_node()
+        // node_pointer get_max_node() const
+        // //node_reference get_max_node()
+        // {
+        //     node_pointer now_node = _root;
+        //     if (_root == NULL)
+        //     {
+        //         return NULL;
+        //     }
+        //     while (1)
+        //     {
+        //         if (now_node->child_right == NULL)
+        //         {
+        //             break ;
+        //         }
+        //     }
+        //     return (now_node);
+        // }
+
+        iterator get_max_iter() const
+        //node_reference get_max_node()
         {
             node_pointer now_node = _root;
             if (_root == NULL)
@@ -457,7 +497,7 @@ namespace ft
                     break ;
                 }
             }
-            return now_node;
+            return iterator(now_node);
         }
 
         size_t size() const
@@ -472,7 +512,23 @@ namespace ft
 
         void swap(avl_tree& other)
         {
-            
+            /*
+                    node_pointer _root;
+        size_t _size;
+        //allocator_type _node_allocator;
+        node_allocator _node_allocator;
+        value_compare _compare;
+            */
+            if (&other == this)
+            {
+                return ;
+            }
+            node_pointer temp_node_ptr = _root;
+            size_type temp_size = _size;
+            _root = other->_root;
+            _size = other->_size;
+            other->_root = temp_node_ptr;
+            other->_size = temp_size;
         }
 
         bool empty() const
@@ -494,41 +550,41 @@ namespace ft
 
     };
 
-    template <typename T_key, typename T_value>
-    void print2DUtil(ft::node<T_key, T_value>* root, int space)
-    {
+    // template <typename T_key, typename T_value>
+    // void print2DUtil(ft::node<T_key, T_value>* root, int space)
+    // {
 
-        // Base case
-        if (root == NULL)
-            return;
+    //     // Base case
+    //     if (root == NULL)
+    //         return;
     
-        // Increase distance between levels
-        space += COUNT;
+    //     // Increase distance between levels
+    //     space += COUNT;
     
-        // Process right child first
-        print2DUtil(root->child_right, space);
+    //     // Process right child first
+    //     print2DUtil(root->child_right, space);
     
-        // Print current node after space
-        // count
-        std::cout << std::endl;
-        for (int i = COUNT; i < space; i++)
-            std::cout << " ";
-        std::cout << root->data.second << "\n";
+    //     // Print current node after space
+    //     // count
+    //     std::cout << std::endl;
+    //     for (int i = COUNT; i < space; i++)
+    //         std::cout << " ";
+    //     std::cout << root->data.second << "\n";
     
-        // Process left child
-        print2DUtil(root->child_left, space);
-    }
+    //     // Process left child
+    //     print2DUtil(root->child_left, space);
+    // }
     
     // Wrapper over print2DUtil()
-    template <typename T_key, typename T_value>
-    void print2D(ft::node<T_key, T_value>* root)
-    {
-        static size_t i = 0;
-        // Pass initial space count as 0
-        std::cout << "-----------------["<< i++ <<"]----------------" << std::endl;
-        print2DUtil(root, 0);
-        std::cout << "------------------------------------" << std::endl;
-    }
+    // template <typename T_key, typename T_value>
+    // void print2D(ft::node<T_key, T_value>* root)
+    // {
+    //     static size_t i = 0;
+    //     // Pass initial space count as 0
+    //     std::cout << "-----------------["<< i++ <<"]----------------" << std::endl;
+    //     print2DUtil(root, 0);
+    //     std::cout << "------------------------------------" << std::endl;
+    // }
 }
 
 #endif

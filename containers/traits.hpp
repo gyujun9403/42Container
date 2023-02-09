@@ -13,7 +13,7 @@ namespace ft
     class Random_access_iterator_tag : public Bidirectional_iterator_tag { };
 
     template <typename Iterator>
-    class iterator_traits
+    struct iterator_traits
     {
     public:
         typedef typename Iterator::difference_type      difference_type;
@@ -25,7 +25,7 @@ namespace ft
 
     // 특수화. 포인터인 경우
     template <typename T>
-    class iterator_traits<T*>
+    struct iterator_traits<T*>
     {
     public:
         typedef std::ptrdiff_t  difference_type;
@@ -37,7 +37,7 @@ namespace ft
 
     // 특수화. 상수 포인터인 경우.
     template <typename T>
-    class iterator_traits<const T*>
+    struct iterator_traits<const T*>
     {
     public:
         typedef std::ptrdiff_t  difference_type;

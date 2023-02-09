@@ -3,6 +3,7 @@
 
 #include "pair.hpp"
 #include "utils.hpp"
+#include "traits.hpp"
 #include "bidirectional_iterator_avl.hpp"
 #include "reverse_iterator.hpp"
 #include "avl_tree.hpp"
@@ -10,12 +11,13 @@
 namespace ft
 {
     // less -> 함수객체에 대한 공부 필요.
-    template <typename Key, typename T, typename Compare = ft::less<Key>, typename Allocator = std::allocator<ft::node<Key, T> > >
+    template <typename Key, typename T, typename Compare = ft::less<Key>, typename Allocator = std::allocator<ft::pair<const Key, T> > >
     class map
     {
     private:
         typedef typename ft::avl_tree<Key, T, Compare, Allocator> tree_type;
-        typedef typename Allocator::pointer node_pointer;
+        //typedef typename tree_type* tree_pointer;
+        typedef typename tree_type::node_pointer node_pointer;
 
     public:
     // for iterator_trains
@@ -69,7 +71,7 @@ namespace ft
 		};
         allocator_type _data_allocator;
         key_compare _comp;
-        avl_tree<Key, T, Compare, Allocator> _tree;
+        tree_type _tree;
     
     public:
         map(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
@@ -134,22 +136,22 @@ namespace ft
         //Iterators
         iterator begin()
         {
-            return iterator(_tree.get_min_node());
+            return _tree.get_min_iter();
         }
 
         const_iterator begin() const
         {
-            return const_iterator(_tree.get_min_node());
+            return const_iterator(_tree.get_min_iter());
         }
 
         iterator end()
         {
-            return iterator(_tree.get_max_node());
+            return _tree.get_max_iter();
         }
 
         const_iterator end() const
         {
-            return const_iterator(_tree.get_max_node());
+            return const_iterator(_tree.get_max_iter());
         }
 
         reverse_iterator rbegin()
@@ -157,20 +159,20 @@ namespace ft
             return reverse_iterator(_tree.get_max_node());
         }
 
-        const_reverse_iterator rbegin() const
-        {
-            return const_reverse_iterator(_tree.get_max_node());
-        }
+        // const_reverse_iterator rbegin() const
+        // {
+        //     return const_reverse_iterator(_tree.get_max_node());
+        // }
 
         reverse_iterator rend()
         {
             return reverse_iterator(_tree.get_min_node());
         }
 
-        const_reverse_iterator rend() const
-        {
-            return const_reverse_iterator(_tree.get_min_node());
-        }
+        // const_reverse_iterator rend() const
+        // {
+        //     return const_reverse_iterator(_tree.get_min_node());
+        // }
 
         //Capacity
         bool empty() const
@@ -207,7 +209,7 @@ namespace ft
         {
             while (first != last)
             {
-                _tree->insert((*first)->data.first, (*first)->data.second);
+                _tree.insert(first->first, first->second);
                 first++;
             }
         }

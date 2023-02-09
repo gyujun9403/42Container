@@ -9,14 +9,24 @@
 namespace ft
 {
     template <typename T, typename Compare> // T : node<T_key, T_val>
-    class Bidirectional_iterator_avl : Base_iterator<T>
+    class Bidirectional_iterator_avl //: Base_iterator<T>
     {
     public:
         typedef typename ft::Bidirectional_iterator_tag iterator_category;
         typedef typename ft::iterator_traits<T*>::difference_type difference_type; // FIX!
         typedef typename ft::iterator_traits<T*>::value_type value_type;
-        typedef typename ft::iterator_traits<T*>::pointer node_pointer; // FIX! 이걸 쌩으로 T*, T&으로 쓰면
-        typedef typename ft::iterator_traits<T*>::reference node_reference;
+        typedef typename ft::iterator_traits<T*>::pointer pointer; //  TODO!!!!!!!!!!!!// node -> pair
+        typedef typename ft::iterator_traits<T*>::reference reference;
+        typedef node<T>* node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
+        typedef node<T>& node_reference;
+        typedef std::size_t size_type;
+
+        //typedef typename ft::iterator_traits<T*>::difference_type difference_type; // FIX!
+        // typedef typename ft::iterator_traits<T*>::value_type value_type;
+        // typedef typename ft::iterator_traits<T*>::pointer pointer; //  TODO!!!!!!!!!!!!// node -> pair
+        // typedef typename ft::iterator_traits<T*>::reference reference;
+        //typedef typename ft::iterator_traits<T*>::node_pointer node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
+        //typedef typename ft::iterator_traits<T*>::node_reference node_reference;
         //typedef typename ft::iterator_traits<T*>::size_type size_type;
     private:
         node_pointer _node;
@@ -25,7 +35,7 @@ namespace ft
     public:
         Bidirectional_iterator_avl(const Compare& comp = Compare())
         : _node(NULL), _comp(comp) {}
-        Bidirectional_iterator_avl(node_pointer node, const Compare& comp = Compare())
+        Bidirectional_iterator_avl(const node_pointer node, const Compare& comp = Compare())
         : _node(node), _comp(comp) {}
         Bidirectional_iterator_avl(const Bidirectional_iterator_avl<typename ft::remove_const<value_type>::type, Compare>& other)
         : _node(other.base()), _comp() {}
@@ -48,14 +58,14 @@ namespace ft
             return *this;
         }
 
-        node_reference operator*(void) const
+        reference operator*(void) const
         {
             return _node->data; //node::data (ft::pair<const T_key, T_val> 타입)
         }
 
-        node_pointer operator->(void) const
+        pointer operator->(void) const
         {
-            return &_node->data;
+            return &(_node->data);
         }
 
         // 순회 방식 -> 정렬 순서대로 순회 = 중위순회.

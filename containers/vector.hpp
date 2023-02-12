@@ -692,6 +692,7 @@ Allocator:
             }
         }
 		return true;
+        
 	}
 
 	template <typename T, typename Alloc>
@@ -703,30 +704,31 @@ Allocator:
 	template <typename T, typename Alloc>
 	bool operator< (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
     {
-        if (lhs.size() < rhs.size())
-        {
-			return true;
-        }
-        else if (lhs.size() > rhs.size())
-        {
-            return false;
-        }
-		for (size_t i = 0; i < rhs.size(); i++)
-        {
-            if (lhs[i] == rhs[i])
-            {
-                continue ;
-            }
-            else if (lhs[i] < rhs[i])
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-		return false;
+        // if (lhs.size() < rhs.size())
+        // {
+		// 	return true;
+        // }
+        // else if (lhs.size() > rhs.size())
+        // {
+        //     return false;
+        // }
+		// for (size_t i = 0; i < rhs.size(); i++)
+        // {
+        //     if (lhs[i] == rhs[i])
+        //     {
+        //         continue ;
+        //     }
+        //     else if (lhs[i] < rhs[i])
+        //     {
+        //         return true;
+        //     }
+        //     else
+        //     {
+        //         return false;
+        //     }
+        // }
+		// return false;
+        return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 	
 	template <typename T, typename Alloc >

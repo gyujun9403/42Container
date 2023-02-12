@@ -73,7 +73,7 @@ namespace ft
 
         Reverse_iterator& operator+=(difference_type n)
         {
-            _origin_iter - n;
+            _origin_iter -= n;
             return *this;
         }
 
@@ -97,7 +97,7 @@ namespace ft
 
         Reverse_iterator& operator-=(difference_type n)
         {
-            _origin_iter + n;
+            _origin_iter += n;
             return *this;
         }
     };

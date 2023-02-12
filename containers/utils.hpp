@@ -125,6 +125,58 @@ namespace ft
         bool operator() (const T& x, const T& y) const { return (x < y); }
     };
 
+
+    /* Lexicographical comparison */
+
+    /*
+    ** @brief Return true if the range [first1, last2) compare
+    ** lexicographically lest than the range [first2, last2).
+    **
+    ** @param first1, last1 the start and the end of the first range.
+    ** @param first2, last2 the start and the end of the second range.
+    ** @return true if the first range compares lexicographically less
+    ** than the second, false otherwise.
+    */
+    template <class InputIterator1, class InputIterator2>
+        bool lexicographical_compare (InputIterator1 first1, InputIterator1 last1,
+                                        InputIterator2 first2, InputIterator2 last2)
+        {
+            while (first1 != last1)
+            {
+                if (first2 == last2 || *first2 < *first1) return false;
+                else if (*first1 < *first2) return true;
+                ++first1;
+                ++first2;
+            }
+            return (first2 != last2);
+        }
+
+    /*
+    ** @brief Return true if the range [first1, last2) compare
+    ** lexicographically lest than the range [first2, last2).
+    ** The comparision is effectued by "comp".
+    **
+    ** @param first1, last1 the start and the end of the first range.
+    ** @param first2, last2 the start and the end of the second range.
+    ** @param comp the function that will compare.
+    ** @return true if the first range compares lexicographically less
+    ** than the second, false otherwise.
+    */
+    template <class InputIterator1, class InputIterator2, class Compare>
+        bool lexicographical_compare (InputIterator1 first1, InputIterator1 last1,
+                                        InputIterator2 first2, InputIterator2 last2,
+                                        Compare comp)
+        {
+            while (first1 != last1)
+            {
+                if (first2 == last2 || comp(*first2, *first1)) return false;
+                else if (comp(*first1, *first2)) return true;
+                ++first1;
+                ++first2;
+            }
+            return (first2 != last2);
+        }
+
     long long max(long long a, long long b)
     {
         if (a > b)

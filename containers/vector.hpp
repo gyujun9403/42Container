@@ -271,7 +271,7 @@ Allocator:
                 //_end = _start;
                 for (size_type i = 0; i < new_size; i++)
                 {
-                    this->_data_allocator.construct(new_start + i, *this->_start);
+                    this->_data_allocator.construct(new_start + i, *(this->_start + i));
                 }
                 this->clear(); // 이전꺼 남아 있어서 leak발생!
                 this->_start = new_start;
@@ -432,12 +432,14 @@ Allocator:
             }
 			_data_allocator.construct(_start + _size, val);
 			++_size;
+            ++_finish;
 		}
 
         void pop_back()
         {
 			_data_allocator.destroy(_start + _size - 1);
 			--_size;
+            --_finish;
 		}
 
         iterator insert (iterator position, const value_type& val)
@@ -477,7 +479,7 @@ Allocator:
                 // 맨 뒤에서부터
 				for (size_type i = _size; i > pos_len; i--)
                 {
-                    _data_allocator.construct(_start + i + 1, *(_start + 1));
+                    _data_allocator.construct(_start + i, *(_start + i - 1));
                     _data_allocator.destroy(_start + i);
 					// _data_allocator.destroy(_start + i);
 					// _data_allocator.construct(_start + i, *(_start + i - 1));
@@ -521,7 +523,7 @@ Allocator:
                 // 이후 
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(&(*position) + i, *(&(*position) + i));
+                    _data_allocator.construct(temp_start + n + i, *(&(*position) + i));
                 }
 				for (size_type i = 0; i < _size; i++)
                 {
@@ -571,11 +573,11 @@ Allocator:
                 // try catch???
                 for (size_type i = 0; i < n; i++)
                 {
-                    _data_allocator.construct(new_start + pos_len + i, *(_start + i));
+                    _data_allocator.construct(new_start + pos_len + i, *(first++));
                 }
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(new_start + pos_len + n + i, *(new_start + pos_len + i));
+                    _data_allocator.construct(new_start + pos_len + n + i, *(_start + pos_len + i));
                 }
 				for (size_type i = 0; i < _size; i++)
                 {
@@ -585,6 +587,7 @@ Allocator:
 				_size += n;
 				_capacity = new_capacity;
 				_start = new_start;
+                _finish = _start + _size;
 			}
 			else
             {
@@ -631,8 +634,8 @@ Allocator:
                 _data_allocator.destroy(&(*last) + i);
             }
             //_data_allocator.destroy(_finish);
-            --_size;
-            --_finish;
+            _size -= n;
+            _finish = _start + _size;
             return &(*first);
 		}
 
@@ -710,13 +713,17 @@ Allocator:
         }
 		for (size_t i = 0; i < rhs.size(); i++)
         {
-			if (lhs[i] != rhs[i])
+            if (lhs[i] == rhs[i])
             {
-                if (lhs[i] < rhs[i])
-                {
-                    return true;
-                }
-				return false;
+                continue ;
+            }
+            else if (lhs[i] < rhs[i])
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 		return false;
@@ -725,7 +732,7 @@ Allocator:
 	template <typename T, typename Alloc >
 	bool operator<= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
     {
-		return !(lhs > rhs);
+		return !(rhs < lhs);
 	}
 	
 	template <typename T, typename Alloc >

@@ -4,7 +4,7 @@
 #include "pair.hpp"
 #include "utils.hpp"
 #include "traits.hpp"
-#include "bidirectional_iterator_avl.hpp"
+#include "avl_iterator.hpp"
 #include "reverse_iterator.hpp"
 #include "avl_tree.hpp"
 
@@ -97,10 +97,11 @@ namespace ft
         {
             if (&other == this)
             {
-                return this;
+                return *this;
             }
             this->clear();
             this->insert(other.begin(), other.end());
+            return *this;
         }
 
         // allocator_type get_allocator() const
@@ -141,7 +142,7 @@ namespace ft
 
         const_iterator begin() const
         {
-            return const_iterator(_tree.get_min_iter());
+            return _tree.get_min_cosnt_iter();
         }
 
         iterator end()
@@ -151,7 +152,7 @@ namespace ft
 
         const_iterator end() const
         {
-            return const_iterator(_tree.get_max_iter());
+            return _tree.get_max_const_iter();
         }
 
         reverse_iterator rbegin()
@@ -185,7 +186,10 @@ namespace ft
             return _tree.size();
         }
 
-        size_type max_size() const; // 최대 저장 가능 횟수...?
+        size_type max_size() const
+        {
+            return _tree.max_size();
+        }
         //Modifiers
         void clear()
         {
@@ -204,6 +208,14 @@ namespace ft
             return ft::make_pair<iterator, bool>(iterator(&(*rt_ptr)), rt_bool);
         }
 
+
+        iterator insert (iterator position, const value_type& value)
+        {
+            (void)position;
+            node_pointer rt_ptr = _tree.insert(value.first, value.second);
+            return iterator(&(*rt_ptr));
+        }
+
         template< class InputIt >
         void insert(InputIt first, InputIt last)
         {
@@ -216,7 +228,7 @@ namespace ft
 
         void erase(iterator pos)
         {
-            _tree.erase((*pos)->data.first);
+            _tree.erase(pos->first);
         }
 
         size_type erase(const Key& key)
@@ -260,62 +272,72 @@ namespace ft
 
         iterator lower_bound(const Key& key)
         {
+            //std::cout << "!!!!lower_bound" << std::endl;
+
             iterator begin = this->begin();
             iterator end = this->end();
             while (begin != end)
             {
-                if (!_compare(*begin, key))
+                //std::cout << "1" << std::endl;
+                if (_comp(begin->first, key) == false)
                 {
-                    return begin;
+                    //std::cout << "2" << std::endl;
+                    break ;
                 }
                 begin++;
+                //std::cout << "3" << std::endl;
             }
-            return end;
+            return begin;
         }
 
         const_iterator lower_bound(const Key& key) const
         {
+            //std::cout << "!!!!const_lower_bound" << std::endl;
             const_iterator begin = this->begin();
             const_iterator end = this->end();
             while (begin != end)
             {
-                if (!_compare(*begin, key))
+                if (_comp(begin->first, key) == false)
                 {
-                    return begin;
+                    break ;
                 }
                 begin++;
             }
-            return end;
+            return begin;
+            //return const_iterator(this->lower_bound(key));
         }
 
         iterator upper_bound(const Key& key)
         {
+            //std::cout << "!!!!upper_bound" << std::endl;
             iterator begin = this->begin();
             iterator end = this->end();
             while (begin != end)
             {
-                if (_compare(*begin, key))
+                if (_comp(begin->first, key))
                 {
                     return begin;
                 }
                 begin++;
             }
-            return end;
+            return begin;
         }
 
         const_iterator upper_bound(const Key& key) const
         {
+            //std::cout << "!!!!const_upper_bound" << std::endl;
             const_iterator begin = this->begin();
             const_iterator end = this->end();
             while (begin != end)
             {
-                if (_compare(*begin, key))
+                if (_comp(begin->first , key))
                 {
                     return begin;
                 }
                 begin++;
             }
-            return end;
+            return begin;
+            //return const_iterator(this->upper_bound(key));
         }
 
         ft::pair<iterator,iterator> equal_range(const Key& key)

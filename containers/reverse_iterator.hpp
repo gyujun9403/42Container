@@ -61,7 +61,7 @@ namespace ft
 		Reverse_iterator operator++(int) // 복사본을 던져주므로 레퍼런스 아님.
 		{
 			Reverse_iterator temp_riter = *this;
-			--temp_riter;
+			--_origin_iter;
 			return temp_riter;	
 		}
 

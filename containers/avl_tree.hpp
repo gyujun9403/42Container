@@ -8,8 +8,9 @@
 #include "utils.hpp"
 #include "pair.hpp"
 #include "node.hpp"
-#include "bidirectional_iterator_avl.hpp"
+#include "avl_iterator.hpp"
 #include "reverse_iterator.hpp"
+#include <iostream>
 #define LEFT 0
 #define RIGHT 1
 
@@ -17,14 +18,14 @@
 
 namespace ft
 {
-    template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator< ft::node<ft::pair<T_key, T_val> > > >
+    template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator< ft::node<ft::pair<const T_key, T_val> > > >
     class avl_tree // : public ITree<T_key, T_val, Alloc>
     {
     public:
 
-        typedef node<ft::pair<T_key, T_val> > node_type;
-        typedef node<ft::pair<T_key, T_val> >* node_pointer;
-        typedef node<ft::pair<T_key, T_val> >& node_reference;
+        typedef node<ft::pair<const T_key, T_val> > node_type;
+        typedef node<ft::pair<const T_key, T_val> >* node_pointer;
+        typedef node<ft::pair<const T_key, T_val> >& node_reference;
         //typedef typename T* pointer;
         typedef typename std::ptrdiff_t difference_type;
         typedef ft::pair<const T_key, T_val> value_type;
@@ -35,8 +36,8 @@ namespace ft
         typedef typename std::size_t size_type;
         typedef Compare value_compare;
         typedef Alloc allocator_type;
-        typedef Bidirectional_iterator_avl<value_type, Compare> iterator;
-		typedef Bidirectional_iterator_avl<const value_type, Compare> const_iterator;
+        typedef Avl_iterator<value_type, Compare> iterator;
+		typedef Avl_const_iterator<value_type, Compare> const_iterator;
 		typedef	ft::Reverse_iterator<iterator> reverse_iterator;
 		typedef	ft::Reverse_iterator<const_iterator> const_reverse_iterator;
         typedef typename Alloc::template rebind<node_type>::other node_allocator;
@@ -52,7 +53,7 @@ namespace ft
         {
             node_pointer rt = _node_allocator.allocate(1);
             //_node_allocator.construct(rt, ft::make_pair<const T_key, T_val>(key, value));
-            _node_allocator.construct(rt, ft::node<ft::pair<T_key, T_val> >(make_pair<const T_key, T_val>(key, value)));
+            _node_allocator.construct(rt, ft::node<ft::pair<const T_key, T_val> >(ft::make_pair<const T_key, T_val>(key, value)));
             return rt;
         }
 
@@ -428,25 +429,7 @@ namespace ft
             }
         }
 
-        // node_pointer get_min_node() const
-        // //node_reference get_min_node()
-        // {
-        //     node_pointer now_node = _root;
-        //     if (_root == NULL)
-        //     {
-        //         return NULL;
-        //     }
-        //     while (1)
-        //     {
-        //         if (now_node->child_left == NULL)
-        //         {
-        //             break ;
-        //         }
-        //     }
-        //     return (now_node);
-        // }
-
-        iterator get_min_iter() const
+        node_pointer get_min_node() const
         //node_reference get_min_node()
         {
             node_pointer now_node = _root;
@@ -454,35 +437,30 @@ namespace ft
             {
                 return NULL;
             }
-            while (1)
+            while (now_node->child_left != NULL)
             {
-                if (now_node->child_left == NULL)
-                {
-                    break ;
-                }
+                // std::cout << "?????!!!" << std::endl;
+                // if (now_node->child_left == NULL)
+                // {
+                //     break ;
+                // }
+                //std::cout << "?????" << std::endl;
+                now_node = now_node->child_left;
             }
-            return iterator(now_node);
+            return (now_node);
         }
 
-        // node_pointer get_max_node() const
-        // //node_reference get_max_node()
-        // {
-        //     node_pointer now_node = _root;
-        //     if (_root == NULL)
-        //     {
-        //         return NULL;
-        //     }
-        //     while (1)
-        //     {
-        //         if (now_node->child_right == NULL)
-        //         {
-        //             break ;
-        //         }
-        //     }
-        //     return (now_node);
-        // }
+        iterator get_min_iter() const
+        {
+            return iterator(this->get_min_node());
+        }
 
-        iterator get_max_iter() const
+        const_iterator get_min_cosnt_iter() const
+        {
+            return const_iterator(this->get_min_node());
+        }
+
+        node_pointer get_max_node() const
         //node_reference get_max_node()
         {
             node_pointer now_node = _root;
@@ -496,8 +474,19 @@ namespace ft
                 {
                     break ;
                 }
+                now_node = now_node->child_right;
             }
-            return iterator(now_node);
+            return (now_node);
+        }
+
+        iterator get_max_iter() const
+        {
+            return iterator(this->get_max_node());
+        }
+
+        const_iterator get_max_const_iter() const
+        {
+            return const_iterator(this->get_max_node());
         }
 
         size_t size() const
@@ -507,7 +496,7 @@ namespace ft
 
         size_t max_size() const
         {
-            return _size;
+            return _node_allocator.max_size();
         }
 
         void swap(avl_tree& other)

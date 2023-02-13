@@ -88,6 +88,10 @@ namespace ft
             //     throw (ft::InvalidIteratorException<typename ft::is_input_iterator_tagged<typename ft::iterator_traits<InputIterator>::iterator_category >::type>());
             this->insert(first, last);
         }
+        map(const map& other)
+        : _data_allocator(other._data_allocator), _comp(other._comp), _tree(other._tree)
+        {}
+
         ~map()
         {
             this->clear();

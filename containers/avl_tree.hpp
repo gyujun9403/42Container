@@ -281,6 +281,9 @@ namespace ft
             _superior.parents = NULL;
         }
 
+        avl_tree (const avl_tree& other)
+        : _size(0), _node_allocator(other.alloc), _compare(other.comp)
+
         ~avl_tree ()
         {
             clear();
@@ -299,6 +302,7 @@ namespace ft
             {
                 _superior.child_left = make_node(key, value);
                 _superior.child_left->parents = &_superior;
+                ++_size;
                 return _superior.child_left;
             }
             while (1)

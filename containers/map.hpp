@@ -132,7 +132,13 @@ namespace ft
 
         T& operator[](const Key& key)
         {
-            return _tree.find(key)->data.second;
+            node_pointer rt = _tree.find(key);
+            if (rt == NULL)
+            {
+                this->insert(ft::make_pair(key, mapped_type()));
+                rt = _tree.find(key);
+            }
+            return (rt->data.second);
         }
         //Iterators
         iterator begin()
@@ -147,17 +153,17 @@ namespace ft
 
         iterator end()
         {
-            return _tree.get_max_iter();
+            return _tree.get_end_iter();
         }
 
         const_iterator end() const
         {
-            return _tree.get_max_const_iter();
+            return _tree.get_end_const_iter();
         }
 
         reverse_iterator rbegin()
         {
-            return reverse_iterator(_tree.get_max_node());
+            return reverse_iterator(_tree.get_end_iter());
         }
 
         // const_reverse_iterator rbegin() const
@@ -314,7 +320,7 @@ namespace ft
             iterator end = this->end();
             while (begin != end)
             {
-                if (_comp(begin->first, key))
+                if (_comp(key, begin->first))
                 {
                     return begin;
                 }
@@ -330,7 +336,7 @@ namespace ft
             const_iterator end = this->end();
             while (begin != end)
             {
-                if (_comp(begin->first , key))
+                if (_comp(key, begin->first))
                 {
                     return begin;
                 }

@@ -78,24 +78,16 @@ namespace ft
         // 순회 방식 -> 정렬 순서대로 순회 = 중위순회.
         Avl_iterator& operator++(void)
         {
-            if (_node == NULL)
-            {
-                return *this;
-            }
             if (_node->child_right == NULL)
             {
-                node_pointer now_node = _node->parents;
-                if (now_node != NULL)
+                node_pointer now_node = _node;
+                while(1)
                 {
-                    while (_comp(now_node->data.first, _node->data.first)) // _node->data.first < now_node->data.first인 동안 반복
-                    {
-                        now_node = now_node->parents;
-                        if (now_node == NULL)
-                        {
-                            _node = NULL;
-                            return *this;
-                        }
-                    }
+                    if (now_node->parents == NULL)
+                        break;
+                    now_node = now_node->parents;
+                    if (_comp(_node->data.first, now_node->data.first))
+                        break;
                 }
                 _node = now_node;
             }
@@ -106,7 +98,6 @@ namespace ft
                 {
                     _node = _node->child_left;
                 }
-                //오른쪽으로 가서 가장 작은거 가져와야함.
             }
             return *this;
         }
@@ -120,24 +111,16 @@ namespace ft
 
         Avl_iterator& operator--(void)
         {
-            if (_node == NULL)
-            {
-                return *this;
-            }
             if (_node->child_left == NULL)
             {
-                node_pointer now_node = _node->parents;
-                if (now_node != NULL)
+                node_pointer now_node = _node;
+                while(1)
                 {
-                    while (_comp(now_node->data.first, _node->data.first)) // _node->data.first > now_node->data.first인 동안 반복
-                    {
-                        now_node = now_node->parents;
-                        if (now_node == NULL)
-                        {
-                            _node = NULL;
-                            return *this;
-                        }
-                    }
+                    if (now_node->parents == NULL)
+                        break;
+                    now_node = now_node->parents;
+                    if (_comp(now_node->data.first, _node->data.first))
+                        break;
                 }
                 _node = now_node;
             }
@@ -253,36 +236,19 @@ namespace ft
 
 			Avl_const_iterator& operator++(void)
 			{
-                if (_node == NULL)
-                {
-                    return *this;
-                }
-                // 오른쪽에 없으면 부모로.
                 if (_node->child_right == NULL)
                 {
-                    node_pointer now_node = _node->parents;
-                    if (now_node != NULL)
+                    node_pointer now_node = _node;
+                    while(1)
                     {
-                        // 부모로 가서
-                        // 부모가 자기보다 크면 그게 노드
-                        // 부모가 자기보다 작으면 클 때 까지 반복
-                        while (_comp(now_node->data.first, _node->data.first)) // _node->data.first < now_node->data.first인 동안 반복
-                        {
-                            //std::cout << "_node: " << _node->data.first << ",now_node: " << now_node->data.first << std::endl;
-                            now_node = now_node->parents;
-                            if (now_node == NULL)
-                            {
-                                //std::cout << "7";
-                                //_node = NULL;
-                                //return *this;
-                                break ;
-                            }
-                        }
-                        //std::cout << "8";
+                        if (now_node->parents == NULL)
+                            break;
+                        now_node = now_node->parents;
+                        if (_comp(_node->data.first, now_node->data.first))
+                            break;
                     }
                     _node = now_node;
                 }
-                // 오른쪽 있으면 오른쪽으로
                 else
                 {
                     _node = _node->child_right;
@@ -303,23 +269,16 @@ namespace ft
 
 			Avl_const_iterator& operator--(void)
 			{
-                if (_node == NULL)
-                {
-                    return *this;
-                }
                 if (_node->child_left == NULL)
                 {
-                    node_pointer now_node = _node->parents;
-                    if (now_node != NULL)
+                    node_pointer now_node = _node;
+                    while(1)
                     {
-                        while (_comp(_node->data.first, now_node->data.first)) // _node->data.first > now_node->data.first인 동안 반복
-                        {
-                            now_node = _node->parents;
-                            if (now_node == NULL)
-                            {
-                                break ;
-                            }
-                        }
+                        if (now_node->parents == NULL)
+                            break;
+                        now_node = now_node->parents;
+                        if (_comp(now_node->data.first, _node->data.first))
+                            break;
                     }
                     _node = now_node;
                 }

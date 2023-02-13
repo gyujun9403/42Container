@@ -43,7 +43,7 @@ namespace ft
         typedef typename Alloc::template rebind<node_type>::other node_allocator;
     public: // TODO: for debug
         node_type _superior; //left에 root존재
-        node_pointer _root;
+        //node_pointer _root;
         size_t _size;
         node_allocator _node_allocator;
         value_compare _compare;
@@ -162,7 +162,8 @@ namespace ft
             {
                 //_root = y;
                 _superior.child_left = y;
-                y->parents = NULL;
+                //y->parents = NULL;
+                y->parents = &_superior;
             }
             connect_node(x, three, LEFT);
             connect_node(y, x, RIGHT);
@@ -182,7 +183,8 @@ namespace ft
             {
                 //_root = y;
                 _superior.child_left = y;
-                y->parents = NULL;
+                //y->parents = NULL;
+                y->parents = &_superior;
             }
             connect_node(x, two, RIGHT);
             connect_node(y, x, LEFT);
@@ -191,8 +193,7 @@ namespace ft
 
         long long get_height(node_pointer ptr_node)
         {
-            //if (ptr_node == NULL)
-            if (ptr_node == _superior.child_left)
+            if (ptr_node == NULL)
             {
                 return -1;
             }
@@ -204,8 +205,7 @@ namespace ft
 
         void recur_set_height(node_pointer ptr_node)
         {
-            //if (ptr_node == NULL)
-            if (ptr_node == _superior.child_left)
+            if (ptr_node == NULL) // 가장 끝  노드에 도달
             {
                 return ;
             }
@@ -219,8 +219,7 @@ namespace ft
 
         void recur_set_balace(node_pointer ptr_node)
         {
-            //if (ptr_node == NULL)
-            if (ptr_node == _superior.child_left)
+            if (ptr_node == NULL) // 가장 끝  노드에 도달
             {
                 return ;
             }
@@ -295,12 +294,13 @@ namespace ft
             //     _root = make_node(key, value);
             //     return _root;
             // }
+            node_pointer now_node = _superior.child_left;
             if (_superior.child_left == NULL)
             {
                 _superior.child_left = make_node(key, value);
+                _superior.child_left->parents = &_superior;
                 return _superior.child_left;
             }
-            node_pointer now_node = _superior.child_left;
             while (1)
             {
                 if (_compare(key, now_node->data.first))
@@ -309,7 +309,6 @@ namespace ft
                     {
                         connect_node(now_node, make_node(key, value), LEFT);
                         renewal_heights();
-                        //recur_set_balace(_root);
                         recur_set_balace(_superior.child_left);
                         break ;
                     }
@@ -318,14 +317,12 @@ namespace ft
                         now_node = now_node->child_left;
                     }
                 }
-                //else if (key > now_node->data.first)
                 else if (_compare(now_node->data.first, key))
                 {
                     if (now_node->child_right == NULL)
                     {
                         connect_node(now_node, make_node(key, value), RIGHT);
                         renewal_heights();
-                        //recur_set_balace(_root);
                         recur_set_balace(_superior.child_left);
                         break ;
                     }
@@ -341,7 +338,7 @@ namespace ft
                 }
             }
             ++_size;
-            //print2D(_root);
+            //print2D(_superior.child_left);
             return now_node;
         }
 
@@ -394,7 +391,7 @@ namespace ft
             //recur_set_balace(_root);
             recur_set_balace(_superior.child_left);
             --_size;
-            //print2D(_root);
+            //print2D(_superior.child_left);
             return ;
         }
 
@@ -415,26 +412,31 @@ namespace ft
         {
             //node_pointer now_node = _root;
             node_pointer now_node = _superior.child_left;
+            if (_superior.child_left == NULL)
+            {
+                //return const_cast<node_pointer>(&_superior);
+                return NULL;
+            }
             while (1)
             {
-                //if (key < now_node->data.first)
                 if (_compare(key, now_node->data.first))
                 {
                     if (now_node->child_left == NULL)
                     {
                         return NULL;
+                        //return const_cast<node_pointer>(&_superior);
                     }
                     else
                     {
                         now_node = now_node->child_left;
                     }
                 }
-                //else if (key > now_node->data.first)
                 else if (_compare(now_node->data.first, key))
                 {
                     if (now_node->child_right == NULL)
                     {
                         return NULL;
+                        //return const_cast<node_pointer>(&_superior);
                     }
                     else
                     {
@@ -449,10 +451,10 @@ namespace ft
         }
 
         node_pointer get_min_node() const
-        //node_reference get_min_node()
         {
-            node_pointer now_node = _root;
-            if (_root == NULL)
+            //node_pointer now_node = _root;
+            node_pointer now_node = _superior.child_left;
+            if (_superior.child_left == NULL)
             {
                 return NULL;
             }
@@ -473,33 +475,32 @@ namespace ft
             return const_iterator(this->get_min_node());
         }
 
-        node_pointer get_max_node() const
-        //node_reference get_max_node()
+        // node_pointer get_max_node() const
+        // {
+        //     node_pointer now_node = _superior.child_left;
+        //     if (_superior.child_left == NULL)
+        //     {
+        //         return NULL;
+        //     }
+        //     while (1)
+        //     {
+        //         if (now_node->child_right == NULL)
+        //         {
+        //             break ;
+        //         }
+        //         now_node = now_node->child_right;
+        //     }
+        //     return (now_node);
+        // }
+
+        iterator get_end_iter() const
         {
-            node_pointer now_node = _root;
-            if (_root == NULL)
-            {
-                return NULL;
-            }
-            while (1)
-            {
-                if (now_node->child_right == NULL)
-                {
-                    break ;
-                }
-                now_node = now_node->child_right;
-            }
-            return (now_node);
+            return iterator(const_cast<node_pointer>(&_superior));
         }
 
-        iterator get_max_iter() const
+        const_iterator get_end_const_iter() const
         {
-            return iterator(this->get_max_node());
-        }
-
-        const_iterator get_max_const_iter() const
-        {
-            return const_iterator(this->get_max_node());
+            return const_iterator(const_cast<node_pointer>(&_superior));
         }
 
         size_t size() const
@@ -514,22 +515,20 @@ namespace ft
 
         void swap(avl_tree& other)
         {
-            /*
-                    node_pointer _root;
-        size_t _size;
-        //allocator_type _node_allocator;
-        node_allocator _node_allocator;
-        value_compare _compare;
-            */
             if (&other == this)
             {
                 return ;
             }
-            node_pointer temp_node_ptr = _root;
+            // node_pointer temp_node_ptr = _root;
+            // size_type temp_size = _size;
+            // _root = other->_root;
+            // _size = other->_size;
+            // other->_root = temp_node_ptr;
+            node_pointer temp_node_ptr = _superior.child_left;
             size_type temp_size = _size;
-            _root = other->_root;
+            _superior.child_left = other->_superior.child_left;
             _size = other->_size;
-            other->_root = temp_node_ptr;
+            other->_superior.child_left = temp_node_ptr;
             other->_size = temp_size;
         }
 
@@ -545,8 +544,8 @@ namespace ft
         void clear()
         {
             // 후위 순회 : 왼쪽자식 -> 오른자식 -> 본체 제거.
-            recur_postorder_clear(_root);
-            _root = NULL;
+            recur_postorder_clear(_superior.child_left);
+            _superior.child_left = NULL;
             _size = 0;
         }
 

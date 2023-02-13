@@ -282,7 +282,12 @@ namespace ft
         }
 
         avl_tree (const avl_tree& other)
-        : _size(0), _node_allocator(other.alloc), _compare(other.comp)
+        : _size(0), _node_allocator(other._node_allocator), _compare(other._compare)
+        {
+            _superior.child_left = NULL;
+            _superior.child_right = NULL;
+            _superior.parents = NULL;
+        }
 
         ~avl_tree ()
         {
@@ -499,11 +504,19 @@ namespace ft
 
         iterator get_end_iter() const
         {
+            if (_superior.child_left == NULL)
+            {
+                return iterator(NULL);
+            }
             return iterator(const_cast<node_pointer>(&_superior));
         }
 
         const_iterator get_end_const_iter() const
         {
+            if (_superior.child_left == NULL)
+            {
+                return const_iterator(NULL);
+            }
             return const_iterator(const_cast<node_pointer>(&_superior));
         }
 

@@ -90,7 +90,9 @@ namespace ft
         }
         map(const map& other)
         : _data_allocator(other._data_allocator), _comp(other._comp), _tree(other._tree)
-        {}
+        {
+            this->insert(other.begin(), other.end());
+        }
 
         ~map()
         {

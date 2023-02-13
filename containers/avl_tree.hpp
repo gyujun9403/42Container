@@ -15,7 +15,7 @@
 #define RIGHT 1
 
 #define COUNT 5
-
+//sdgdsgasdg
 namespace ft
 {
     template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator< ft::node<ft::pair<const T_key, T_val> > > >
@@ -365,7 +365,7 @@ namespace ft
                 // 오른쪽 자식만 있는 경우 -> 서브노드의 successor으로 대체.
                 else
                 {
-                    substitute_node = take_successor(ptr_node);
+                    substitute_node = take_seruccessor(ptr_node);
                 }
             }
             else

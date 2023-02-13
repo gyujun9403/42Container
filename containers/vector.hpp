@@ -225,7 +225,7 @@ Allocator:
                         this->reserve(2 * _capacity);
                     }
                 }
-                for (size_type i = 0; i < n; i++)
+                for (size_type i = _size; i < n; i++)
                 {
                     _data_allocator.construct(this->_start + i, val);
                 }

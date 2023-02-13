@@ -35,21 +35,24 @@ namespace ft
         
         reference operator*() const
         {
-            // //iter temp_iter = _origin_iter;
-            // return (*(_origin_iter - 1));
-            iter tmp = _origin_iter;
-            return *(--tmp);
+            //iter temp_iter = _origin_iter;
+            return (*(_origin_iter - 1));
+            //iter tmp = _origin_iter;
+            // iter tmp = _origin_iter;
+            // return (*(--tmp));
         }
 
         pointer operator->() const
         {
             //iter temp_iter = _origin_iter;
-            return _origin_iter - 1;
+            //return _origin_iter - 1;
+            return &(operator*());
         }
 
         reference operator[] (difference_type n) const
         {
-            return _origin_iter - n - 1;
+            return *(_origin_iter - n - 1);
+            //return _origin_iter[-n - 1];
         }
 
 		Reverse_iterator& operator++()
@@ -61,7 +64,7 @@ namespace ft
 		Reverse_iterator operator++(int) // 복사본을 던져주므로 레퍼런스 아님.
 		{
 			Reverse_iterator temp_riter = *this;
-			--_origin_iter;
+			++(*this);
 			return temp_riter;	
 		}
 
@@ -86,7 +89,7 @@ namespace ft
         Reverse_iterator operator--(int)
         {
             Reverse_iterator temp_riter = *this;
-            ++_origin_iter;
+            --(*this);
             return temp_riter;
         }
 
@@ -129,49 +132,49 @@ namespace ft
     template <typename iter>
     bool operator< (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() < rhs.base());
+        return (lhs.base() > rhs.base());
     }
 
     template <typename iter_L, typename iter_R>
     bool operator< (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() < rhs.base());
+        return (lhs.base() > rhs.base());
     }
 
     template <typename iter>
     bool operator<= (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() <= rhs.base());
+        return (lhs.base() >= rhs.base());
     }
 
     template <typename iter_L, typename iter_R>
     bool operator<= (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() <= rhs.base());
+        return (lhs.base() >= rhs.base());
     }
 
     template <typename iter>
     bool operator> (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() > rhs.base());
+        return (lhs.base() < rhs.base());
     }
 
     template <typename iter_L, typename iter_R>
     bool operator> (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() > rhs.base());
+        return (lhs.base() < rhs.base());
     }
 
     template <typename iter>
     bool operator>= (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() >= rhs.base());
+        return (lhs.base() <= rhs.base());
     }
 
     template <typename iter_L, typename iter_R>
     bool operator>= (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() >= rhs.base());
+        return (lhs.base() <= rhs.base());
     }
 
     template <typename iter>
@@ -181,11 +184,18 @@ namespace ft
 	    return(x + n);
     }
 
-    template <typename iter>
-    typename Reverse_iterator<iter>::difference_type operator- 
-        (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
+    // template <typename iter>
+    // typename Reverse_iterator<iter>::difference_type operator- 
+    //     (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
+    // {
+    //     return(lhs.base() - rhs.base());
+    // }
+
+    template <typename iter_L, typename iter_R>
+    typename Reverse_iterator<iter_L>::difference_type
+        operator-(const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return(lhs.base() - rhs.base());
+        return(rhs.base() - lhs.base());
     }
 }
 

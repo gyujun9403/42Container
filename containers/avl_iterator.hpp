@@ -20,8 +20,9 @@ namespace ft
         typedef typename ft::iterator_traits<T*>::value_type value_type;
         typedef typename ft::iterator_traits<T*>::pointer pointer; //  TODO!!!!!!!!!!!!// node -> pair
         typedef typename ft::iterator_traits<T*>::reference reference;
-        typedef node<T>* node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
-        typedef node<T>& node_reference;
+        typedef node<T> node_type;
+        typedef node_type* node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
+        typedef node_type& node_reference;
         typedef std::size_t size_type;
 
         // template<typename Tf, typename Comparef>
@@ -34,6 +35,7 @@ namespace ft
         //typedef typename ft::iterator_traits<T*>::node_reference node_reference;
         //typedef typename ft::iterator_traits<T*>::size_type size_type;
     //private:
+        //node_type _dumy_end_node;
         node_pointer _node;
         Compare _comp;
 
@@ -100,6 +102,11 @@ namespace ft
             else
             {
                 _node = _node->child_right;
+                while (_node->child_left != NULL)
+                {
+                    _node = _node->child_left;
+                }
+                //오른쪽으로 가서 가장 작은거 가져와야함.
             }
             return *this;
         }
@@ -137,6 +144,10 @@ namespace ft
             else
             {
                 _node = _node->child_left;
+                while (_node->child_right != NULL)
+                {
+                    _node = _node->child_right;
+                }
             }
             return *this;
         }
@@ -275,6 +286,10 @@ namespace ft
                 else
                 {
                     _node = _node->child_right;
+                    while (_node->child_left != NULL)
+                    {
+                        _node = _node->child_left;
+                    }
                 }
                 return *this;
 			}
@@ -311,6 +326,10 @@ namespace ft
                 else
                 {
                     _node = _node->child_left;
+                    while (_node->child_right != NULL)
+                    {
+                        _node = _node->child_right;
+                    }
                 }
                 return *this;
 			}

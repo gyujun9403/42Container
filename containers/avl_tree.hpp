@@ -3,56 +3,49 @@
 
 #include <memory>
 #include <exception>
-#include <iostream>
-//#include "Itree.hpp"
 #include "utils.hpp"
 #include "pair.hpp"
 #include "node.hpp"
 #include "avl_iterator.hpp"
 #include "reverse_iterator.hpp"
-#include <iostream>
 #define LEFT 0
 #define RIGHT 1
 
-#define COUNT 5
-//sdgdsgasdg
 namespace ft
 {
     template <typename T_key, typename T_val, class Compare = std::less<T_key>, typename Alloc = std::allocator< ft::node<ft::pair<const T_key, T_val> > > >
-    class avl_tree // : public ITree<T_key, T_val, Alloc>
+    class avl_tree
     {
     public:
-
-        typedef node<ft::pair<const T_key, T_val> > node_type;
-        typedef node_type* node_pointer;
-        typedef node_type& node_reference;
-        //typedef typename T* pointer;
-        typedef typename std::ptrdiff_t difference_type;
         typedef ft::pair<const T_key, T_val> value_type;
+        typedef node<value_type > node_type;
+        //typedef node<const value_type > const_node_type;
+        typedef node_type* node_pointer;
+        //typedef const_node_type* const_node_pointer;
+        //typedef node_type& node_reference;
+        typedef typename std::ptrdiff_t difference_type;
         typedef value_type* pointer;
         typedef value_type& reference;
-        typedef const node_pointer const_node_pointer;
-        typedef const pointer const_pointer;
         typedef typename std::size_t size_type;
         typedef Compare value_compare;
         typedef Alloc allocator_type;
-        typedef Avl_iterator<value_type, Compare> iterator;
-		typedef Avl_const_iterator<value_type, Compare> const_iterator;
+
+        typedef Avl_iterator<node_type, value_type, Compare> iterator;
+		typedef Avl_iterator<node_type, const value_type, Compare> const_iterator;
 		typedef	ft::Reverse_iterator<iterator> reverse_iterator;
 		typedef	ft::Reverse_iterator<const_iterator> const_reverse_iterator;
         typedef typename Alloc::template rebind<node_type>::other node_allocator;
-    public: // TODO: for debug
-        node_type _superior; //left에 root존재
-        //node_pointer _root;
+    public:
+        node_type _superior;
         size_t _size;
         node_allocator _node_allocator;
         value_compare _compare;
 
     private:
-        node_pointer make_node(T_key& key, T_val& value)
+        node_pointer allocate_node(T_key& key, T_val& value)
         {
             node_pointer rt = _node_allocator.allocate(1);
-            _node_allocator.construct(rt, ft::node<ft::pair<const T_key, T_val> >(ft::make_pair<const T_key, T_val>(key, value)));
+            _node_allocator.construct(rt, ft::node<value_type >(ft::make_pair<const T_key, T_val>(key, value)));
             return rt;
         }
 
@@ -153,16 +146,13 @@ namespace ft
         {
             node_pointer y = x->child_left;
             node_pointer three = y->child_right;
-            //if (x != _root)
             if (x != _superior.child_left)
             {
                 connect_node(x->parents, y, get_direc_in_parents(x));
             }
             else
             {
-                //_root = y;
                 _superior.child_left = y;
-                //y->parents = NULL;
                 y->parents = &_superior;
             }
             connect_node(x, three, LEFT);
@@ -174,16 +164,13 @@ namespace ft
         {
             node_pointer y = x->child_right;
             node_pointer two = y->child_left;
-            //if (x != _root)
             if (x != _superior.child_left)
             {
                 connect_node(x->parents, y, get_direc_in_parents(x));
             }
             else
             {
-                //_root = y;
                 _superior.child_left = y;
-                //y->parents = NULL;
                 y->parents = &_superior;
             }
             connect_node(x, two, RIGHT);
@@ -205,7 +192,7 @@ namespace ft
 
         void recur_set_height(node_pointer ptr_node)
         {
-            if (ptr_node == NULL) // 가장 끝  노드에 도달
+            if (ptr_node == NULL)
             {
                 return ;
             }
@@ -261,19 +248,16 @@ namespace ft
             {
                 return ;
             }
-            //recur_set_height(_root);
             recur_set_height(_superior.child_left);
         }
 
         void renewal_heights()
         {
-            //recur_set_height(_root);
             recur_set_height(_superior.child_left);
         }
 
     public:
         avl_tree (const Compare& comp = Compare(), const allocator_type& alloc = allocator_type())
-        //: _root(NULL), _size(0), _node_allocator(alloc), _compare(comp) {}
         : _size(0), _node_allocator(alloc), _compare(comp)
         {
             _superior.child_left = NULL;
@@ -296,16 +280,10 @@ namespace ft
 
         node_pointer insert(T_key key, T_val value)
         {
-            // node_pointer now_node = _root;
-            // if (now_node == NULL)
-            // {
-            //     _root = make_node(key, value);
-            //     return _root;
-            // }
             node_pointer now_node = _superior.child_left;
             if (_superior.child_left == NULL)
             {
-                _superior.child_left = make_node(key, value);
+                _superior.child_left = allocate_node(key, value);
                 _superior.child_left->parents = &_superior;
                 ++_size;
                 return _superior.child_left;
@@ -316,9 +294,11 @@ namespace ft
                 {
                     if (now_node->child_left == NULL)
                     {
-                        connect_node(now_node, make_node(key, value), LEFT);
+                        connect_node(now_node, allocate_node(key, value), LEFT);
                         renewal_heights();
                         recur_set_balace(_superior.child_left);
+                        now_node = now_node->child_left;
+                        ++_size;
                         break ;
                     }
                     else
@@ -330,9 +310,11 @@ namespace ft
                 {
                     if (now_node->child_right == NULL)
                     {
-                        connect_node(now_node, make_node(key, value), RIGHT);
+                        connect_node(now_node, allocate_node(key, value), RIGHT);
                         renewal_heights();
                         recur_set_balace(_superior.child_left);
+                        now_node = now_node->child_right;
+                        ++_size;
                         break ;
                     }
                     else
@@ -342,12 +324,9 @@ namespace ft
                 }
                 else
                 {
-                    now_node->data.second = value;
                     break ;
                 }
             }
-            ++_size;
-            //print2D(_superior.child_left);
             return now_node;
         }
 
@@ -357,73 +336,64 @@ namespace ft
             node_pointer parents = ptr_node->parents;
             if (ptr_node->child_left == NULL)
             {
-                // 자식 노드가 없는 경우 -> 그냥 삭제
                 if (ptr_node->child_right == NULL)
                 {
                     substitute_node = NULL;
                 }
-                // 오른쪽 자식만 있는 경우 -> 서브노드의 successor으로 대체.
-                else
-                {
-                    substitute_node = take_seruccessor(ptr_node);
-                }
-            }
-            else
-            {
-                // 왼쪽 자식만 있는 경우 -> 서브노드의 predecessor으로 대체.
-                if (ptr_node->child_right == NULL)
-                {
-                    substitute_node = take_predecessor(ptr_node);
-                }
-                // 양쪽 자식 모두 있는 경우 ->  서브 노드의 successor으로 대체.
                 else
                 {
                     substitute_node = take_successor(ptr_node);
                 }
             }
-            //if (ptr_node != _root) // parents == NULL인 경우, _root
-            if (ptr_node != _superior.child_left) // parents == NULL인 경우, _root
+            else
+            {
+                if (ptr_node->child_right == NULL)
+                {
+                    substitute_node = take_predecessor(ptr_node);
+                }
+                else
+                {
+                    substitute_node = take_successor(ptr_node);
+                }
+            }
+            if (ptr_node != _superior.child_left)
             {
                 connect_node(parents, substitute_node, get_direc_in_parents(ptr_node));
             }
             else
             {
-                //_root = substitute_node;
                 _superior.child_left = substitute_node;
+                if (substitute_node != NULL)
+                {
+                    substitute_node->parents = &_superior;
+                }
             }
-            // 없앨 노드가 가지고 있는 좌우 붙여주기
             connect_node(substitute_node, ptr_node->child_left, LEFT);
             connect_node(substitute_node, ptr_node->child_right, RIGHT);
             _node_allocator.destroy(ptr_node);
             _node_allocator.deallocate(ptr_node, 1);
             renewal_heights();
-            //recur_set_balace(_root);
             recur_set_balace(_superior.child_left);
             --_size;
-            //print2D(_superior.child_left);
             return ;
         }
 
-        size_t erase(T_key key)
+        size_type erase(T_key key)
         {
-            // 찾고
             node_pointer finded = find(key);
             if (finded == NULL)
             {
                 return 0;
             }
-            // 찾은거 지우기
             erase(finded);
             return 1;
         }
 
         node_pointer find(T_key key) const
         {
-            //node_pointer now_node = _root;
             node_pointer now_node = _superior.child_left;
             if (_superior.child_left == NULL)
             {
-                //return const_cast<node_pointer>(&_superior);
                 return NULL;
             }
             while (1)
@@ -433,7 +403,6 @@ namespace ft
                     if (now_node->child_left == NULL)
                     {
                         return NULL;
-                        //return const_cast<node_pointer>(&_superior);
                     }
                     else
                     {
@@ -445,14 +414,13 @@ namespace ft
                     if (now_node->child_right == NULL)
                     {
                         return NULL;
-                        //return const_cast<node_pointer>(&_superior);
                     }
                     else
                     {
                         now_node = now_node->child_right;
                     }
                 }
-                else //일치
+                else
                 {
                     return now_node;
                 }
@@ -461,7 +429,6 @@ namespace ft
 
         node_pointer get_min_node() const
         {
-            //node_pointer now_node = _root;
             node_pointer now_node = _superior.child_left;
             if (_superior.child_left == NULL)
             {
@@ -481,26 +448,8 @@ namespace ft
 
         const_iterator get_min_cosnt_iter() const
         {
-            return const_iterator(this->get_min_node());
+            return const_iterator(get_min_iter());
         }
-
-        // node_pointer get_max_node() const
-        // {
-        //     node_pointer now_node = _superior.child_left;
-        //     if (_superior.child_left == NULL)
-        //     {
-        //         return NULL;
-        //     }
-        //     while (1)
-        //     {
-        //         if (now_node->child_right == NULL)
-        //         {
-        //             break ;
-        //         }
-        //         now_node = now_node->child_right;
-        //     }
-        //     return (now_node);
-        // }
 
         iterator get_end_iter() const
         {
@@ -517,7 +466,7 @@ namespace ft
             {
                 return const_iterator(NULL);
             }
-            return const_iterator(const_cast<node_pointer>(&_superior));
+            return const_iterator(get_end_iter());
         }
 
         size_t size() const
@@ -536,17 +485,12 @@ namespace ft
             {
                 return ;
             }
-            // node_pointer temp_node_ptr = _root;
-            // size_type temp_size = _size;
-            // _root = other->_root;
-            // _size = other->_size;
-            // other->_root = temp_node_ptr;
             node_pointer temp_node_ptr = _superior.child_left;
             size_type temp_size = _size;
-            _superior.child_left = other->_superior.child_left;
-            _size = other->_size;
-            other->_superior.child_left = temp_node_ptr;
-            other->_size = temp_size;
+            connect_node(&_superior, other._superior.child_left, LEFT);
+            _size = other._size;
+            connect_node(&(other._superior), temp_node_ptr, LEFT);
+            other._size = temp_size;
         }
 
         bool empty() const
@@ -560,49 +504,11 @@ namespace ft
 
         void clear()
         {
-            // 후위 순회 : 왼쪽자식 -> 오른자식 -> 본체 제거.
             recur_postorder_clear(_superior.child_left);
             _superior.child_left = NULL;
             _size = 0;
         }
 
     };
-
-    template <typename T_key, typename T_value>
-    void print2DUtil(ft::node<ft::pair<T_key, T_value> >* root, int space)
-    {
-
-        // Base case
-        if (root == NULL)
-            return;
-    
-        // Increase distance between levels
-        space += COUNT;
-    
-        // Process right child first
-        print2DUtil(root->child_right, space);
-    
-        // Print current node after space
-        // count
-        std::cout << std::endl;
-        for (int i = COUNT; i < space; i++)
-            std::cout << " ";
-        std::cout << root->data.second << "\n";
-    
-        // Process left child
-        print2DUtil(root->child_left, space);
-    }
-    
-    //Wrapper over print2DUtil()
-    template <typename T_key, typename T_value>
-    void print2D(ft::node<ft::pair<T_key, T_value> >* root)
-    {
-        static size_t i = 0;
-        // Pass initial space count as 0
-        std::cout << "-----------------["<< i++ <<"]----------------" << std::endl;
-        print2DUtil(root, 0);
-        std::cout << "------------------------------------" << std::endl;
-    }
 }
-
 #endif

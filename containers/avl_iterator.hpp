@@ -1,73 +1,65 @@
 #ifndef BIDIRECTIONAL_ITERATORE_avl_HPP
 # define BIDIRECTIONAL_ITERATORE_avl_HPP
 
-#include "./base_iterator.hpp"
 #include "./traits.hpp"
 #include "./utils.hpp"
 #include "./node.hpp"
 
 namespace ft
 {
-    // template<typename Tf, typename Comparef>
-    // class Avl_const_iterator;
-
-    template <typename T, typename Compare> // T : node<T_key, T_val>
-    class Avl_iterator //: Base_iterator<T>
+    template <typename N, typename P, typename Compare>
+    class Avl_iterator
     {
     public:
         typedef typename ft::Bidirectional_iterator_tag iterator_category;
-        typedef typename ft::iterator_traits<T*>::difference_type difference_type; // FIX!
-        typedef typename ft::iterator_traits<T*>::value_type value_type;
-        typedef typename ft::iterator_traits<T*>::pointer pointer; //  TODO!!!!!!!!!!!!// node -> pair
-        typedef typename ft::iterator_traits<T*>::reference reference;
-        typedef node<T> node_type;
-        typedef node_type* node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
+        typedef typename ft::iterator_traits<P*>::difference_type difference_type;
+        typedef typename ft::iterator_traits<P*>::value_type value_type;
+        typedef typename ft::iterator_traits<P*>::pointer pointer;
+        typedef typename ft::iterator_traits<P*>::reference reference;
+        typedef N node_type;
+        typedef node_type* node_pointer;
         typedef node_type& node_reference;
         typedef std::size_t size_type;
 
-        // template<typename Tf, typename Comparef>
-        // friend class ft::Avl_const_iterator<Tf, Comparef>;
-        //typedef typename ft::iterator_traits<T*>::difference_type difference_type; // FIX!
-        // typedef typename ft::iterator_traits<T*>::value_type value_type;
-        // typedef typename ft::iterator_traits<T*>::pointer pointer; //  TODO!!!!!!!!!!!!// node -> pair
-        // typedef typename ft::iterator_traits<T*>::reference reference;
-        //typedef typename ft::iterator_traits<T*>::node_pointer node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
-        //typedef typename ft::iterator_traits<T*>::node_reference node_reference;
-        //typedef typename ft::iterator_traits<T*>::size_type size_type;
-    //private:
-        //node_type _dumy_end_node;
+    private:
         node_pointer _node;
         Compare _comp;
 
     public:
         Avl_iterator(const Compare& comp = Compare())
-        : _node(NULL), _comp(comp) {}
+        : _node(NULL), _comp(comp)
+        {}
         Avl_iterator(const node_pointer node, const Compare& comp = Compare())
-        : _node(node), _comp(comp) {}
-        // Avl_iterator(const Avl_iterator<typename ft::remove_const<value_type>::type, Compare>& other)
-        // : _node(other.base()), _comp() {}
+        : _node(static_cast<node_pointer>(node)), _comp(comp)
+        {}
+        Avl_iterator(const Avl_iterator<node_type, typename ft::remove_const<value_type>::type, Compare>& other)
+        : _node(other.base()), _comp(other.get_compare())
+        {}
 
         node_pointer base() const
         {
-            return (_node);
+            return _node;
         }
 
-        Avl_iterator& operator=(const Avl_iterator<typename remove_const<value_type>::type, Compare>& other)
+        Compare get_compare() const
+        {
+            return _comp;
+        }
+
+        Avl_iterator& operator=(const Avl_iterator<node_type, typename remove_const<value_type>::type, Compare>& other)
         {
             if (this == &other)
             {
                 return *this;
             }
-            //_ptr = other->base();
             _node = other._node;
             _comp = other._comp;
-
             return *this;
         }
 
         reference operator*(void) const
         {
-            return _node->data; //node::data (ft::pair<const T_key, T_val> 타입)
+            return _node->data;
         }
 
         pointer operator->(void) const
@@ -75,7 +67,6 @@ namespace ft
             return &(_node->data);
         }
 
-        // 순회 방식 -> 정렬 순서대로 순회 = 중위순회.
         Avl_iterator& operator++(void)
         {
             if (_node->child_right == NULL)
@@ -84,10 +75,14 @@ namespace ft
                 while(1)
                 {
                     if (now_node->parents == NULL)
-                        break;
+                    {
+                        break ;
+                    }
                     now_node = now_node->parents;
                     if (_comp(_node->data.first, now_node->data.first))
-                        break;
+                    {
+                        break ;
+                    }
                 }
                 _node = now_node;
             }
@@ -117,10 +112,14 @@ namespace ft
                 while(1)
                 {
                     if (now_node->parents == NULL)
-                        break;
+                    {
+                        break ;
+                    }
                     now_node = now_node->parents;
                     if (_comp(now_node->data.first, _node->data.first))
-                        break;
+                    {
+                        break ;
+                    }
                 }
                 _node = now_node;
             }
@@ -143,162 +142,168 @@ namespace ft
         }
 
         bool operator==(const Avl_iterator& other)
-        { return (this->_node == other._node); }
+        {
+            return this->_node == other._node;
+        }
 
         bool operator!=(const Avl_iterator& other)
-        { return (this->_node != other._node); }
+        {
+            return this->_node != other._node;
+        }
     };
 
-    // template <typename T_L, typename T_R>
-    // typename ft::Avl_iterator<T_L>
-    //     operator== (const ft::Avl_iterator<T_L> lhs, const ft::Avl_iterator<T_R> rhs)
-    //     {
-    //         // 내용물을 비교하는게 아니라, 포인터의 주소가 같은지 비교하는 연산인듯...?
-    //         return (lhs.base() == rhs.base());
-    //     }
-
-    // template <typename T_L, typename T_R>
-    // typename ft::Avl_iterator<T_L>
-    //     operator!= (const ft::Avl_iterator<T_L> lhs, const ft::Avl_iterator<T_R> rhs)
-    //     {
-    //         return (lhs.base() != rhs.base());
-    //     }
-    template <typename T, class Compare > // value_type : ft::pair<const T_key, T_val>
-	class Avl_const_iterator // : ft::iterator<ft::bidirectional_iterator_tag, T>
+    template <typename N, typename P, class Compare >
+	class Avl_const_iterator
 	{
-		public :
-            typedef typename ft::Bidirectional_iterator_tag iterator_category;
-            typedef typename ft::iterator_traits<T*>::difference_type difference_type; // FIX!
-            typedef typename ft::iterator_traits<T*>::value_type value_type;
-            typedef typename ft::iterator_traits<T*>::pointer pointer; //  TODO!!!!!!!!!!!!// node -> pair
-            typedef typename ft::iterator_traits<T*>::reference reference;
-            typedef node<T>* node_pointer; //  TODO!!!!!!!!!!!!// node -> pair
-            typedef node<T>& node_reference;
-            typedef std::size_t size_type;
+    public :
+        typedef typename ft::Bidirectional_iterator_tag iterator_category;
+        typedef typename ft::iterator_traits<P*>::difference_type difference_type;
+        typedef typename ft::iterator_traits<P*>::value_type value_type;
+        typedef typename ft::iterator_traits<P*>::pointer pointer;
+        typedef typename ft::iterator_traits<P*>::reference reference;
+        typedef ft::Avl_iterator<N, typename ft::remove_const<P>::type, Compare> org_iterator_type;
+        typedef N node_type;
+        typedef node_type* node_pointer;
+        typedef std::size_t size_type;
 
-        // private:
-            node_pointer _node;
-            Compare _comp;
+    private:
+        node_pointer _node;
+        Compare _comp;
 
         public:
-			Avl_const_iterator(const Compare& comp = Compare())
-			: _node(), _comp(comp)
-			{}
+        Avl_const_iterator(const Compare& comp = Compare())
+        : _node(), _comp(comp)
+        {}
 
-			Avl_const_iterator(node_pointer node_p, const Compare& comp = Compare())
-			: _node(node_p), _comp(comp)
-			{}
+        Avl_const_iterator(const node_pointer node_p, const Compare& comp = Compare())
+        : _node(node_p), _comp(comp)
+        {}
 
-			Avl_const_iterator(const Avl_const_iterator& other)
-			: _node(other._node), _comp()
-			{}
+        Avl_const_iterator(const Avl_const_iterator& other)
+        : _node(other.base()), _comp(other.get_compare())
+        {}
 
-            Avl_const_iterator(const Avl_iterator<T, Compare>& other)
-			: _node(other._node), _comp()
-			{}
+        Avl_const_iterator(const org_iterator_type& other)
+        : _node(other.base()), _comp(other.get_compare())
+        {}
 
-			// Avl_const_iterator(const Avl_const_iterator<T, Compare>& other)
-			// : _node(other._node), _comp()
-			// {}
+        virtual ~Avl_const_iterator()
+        {}
 
-			virtual ~Avl_const_iterator() { }
+        node_pointer base() const
+        {
+            return _node;
+        }
 
-			Avl_const_iterator &operator=(const Avl_const_iterator& other)
-			{
-				if (*this == other)
-                {
-					return (*this);
-                }
-				this->_node = other._node;
-				this->_comp = other._comp;
-				return *this;
-			}
+        Compare get_compare() const
+        {
+            return _comp;
+        }            
 
-			bool operator==(const Avl_const_iterator& other)
-			{
-                return (this->_node == other._node);
-            }
-
-			bool operator!=(const Avl_const_iterator& other)
-			{
-                return (this->_node != other._node);
-            }
-
-			reference operator*() const
-			{
-                return (this->_node->data);
-            }
-
-			pointer operator->() const
-			{
-                return (&this->_node->data);
-            }
-
-			Avl_const_iterator& operator++(void)
-			{
-                if (_node->child_right == NULL)
-                {
-                    node_pointer now_node = _node;
-                    while(1)
-                    {
-                        if (now_node->parents == NULL)
-                            break;
-                        now_node = now_node->parents;
-                        if (_comp(_node->data.first, now_node->data.first))
-                            break;
-                    }
-                    _node = now_node;
-                }
-                else
-                {
-                    _node = _node->child_right;
-                    while (_node->child_left != NULL)
-                    {
-                        _node = _node->child_left;
-                    }
-                }
+        Avl_const_iterator &operator=(const Avl_const_iterator& other)
+        {
+            if (*this == other)
+            {
                 return *this;
-			}
+            }
+            this->_node = other._node;
+            this->_comp = other._comp;
+            return *this;
+        }
 
-			Avl_const_iterator operator++(int)
-			{
-				Avl_const_iterator tmp(*this);
-				operator++();
-				return (tmp);
-			}
+        bool operator==(const Avl_const_iterator& other)
+        {
+            return this->_node == other._node;
+        }
 
-			Avl_const_iterator& operator--(void)
-			{
-                if (_node->child_left == NULL)
+        bool operator!=(const Avl_const_iterator& other)
+        {
+            return this->_node != other._node;
+        }
+
+        reference operator*() const
+        {
+            return this->_node->data;
+        }
+
+        pointer operator->() const
+        {
+            return &this->_node->data;
+        }
+
+        Avl_const_iterator& operator++(void)
+        {
+            if (_node->child_right == NULL)
+            {
+                node_pointer now_node = _node;
+                while(1)
                 {
-                    node_pointer now_node = _node;
-                    while(1)
+                    if (now_node->parents == NULL)
                     {
-                        if (now_node->parents == NULL)
-                            break;
-                        now_node = now_node->parents;
-                        if (_comp(now_node->data.first, _node->data.first))
-                            break;
+                        break ;
                     }
-                    _node = now_node;
+                    now_node = now_node->parents;
+                    if (_comp(_node->data.first, now_node->data.first))
+                    {
+                        break ;
+                    }
                 }
-                else
+                _node = now_node;
+            }
+            else
+            {
+                _node = _node->child_right;
+                while (_node->child_left != NULL)
                 {
                     _node = _node->child_left;
-                    while (_node->child_right != NULL)
+                }
+            }
+            return *this;
+        }
+
+        Avl_const_iterator operator++(int)
+        {
+            Avl_const_iterator tmp(*this);
+            operator++();
+            return tmp;
+        }
+
+        Avl_const_iterator& operator--(void)
+        {
+            if (_node->child_left == NULL)
+            {
+                node_pointer now_node = _node;
+                while(1)
+                {
+                    if (now_node->parents == NULL)
                     {
-                        _node = _node->child_right;
+                        break ;
+                    }
+                    now_node = now_node->parents;
+                    if (_comp(now_node->data.first, _node->data.first))
+                    {
+                        break ;
                     }
                 }
-                return *this;
-			}
+                _node = now_node;
+            }
+            else
+            {
+                _node = _node->child_left;
+                while (_node->child_right != NULL)
+                {
+                    _node = _node->child_right;
+                }
+            }
+            return *this;
+        }
 
-			Avl_const_iterator operator--(int)
-			{
-				Avl_const_iterator tmp(*this);
-				operator--();
-				return (tmp);
-			}
+        Avl_const_iterator operator--(int)
+        {
+            Avl_const_iterator tmp(*this);
+            operator--();
+            return tmp;
+        }
 	};
 }
 

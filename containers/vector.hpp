@@ -3,8 +3,6 @@
 
 #include <memory> // for allocator
 #include <stdexcept> //for exception
-
-
 #include "./random_access_iterator.hpp"
 #include "./reverse_iterator.hpp"
 #include "./utils.hpp"

@@ -1,7 +1,6 @@
 #ifndef REVERSE_ITERATOR_HPP
 # define REVERSE_ITERATOR_HPP
 
-#include "./base_iterator.hpp"
 #include "./traits.hpp"
 
 namespace ft
@@ -18,15 +17,12 @@ namespace ft
     private:
         iter _origin_iter;
     public:
-        // 생성자
         Reverse_iterator() {}
-        // 인자 : 반복자.
-        explicit Reverse_iterator(iter x)
-        : _origin_iter(x) {}
-        // 복사생성자
-        template<class T>
-        Reverse_iterator(const Reverse_iterator<T>& x)
-        : _origin_iter(x.base()) {}
+        explicit Reverse_iterator(iter other)
+        : _origin_iter(other) {}
+        template<typename T>
+        Reverse_iterator(const Reverse_iterator<T>& other)
+        : _origin_iter(other.base()) {}
 
         iter base() const
         {
@@ -35,24 +31,18 @@ namespace ft
         
         reference operator*() const
         {
-            //iter temp_iter = _origin_iter;
-            return (*(_origin_iter - 1));
-            //iter tmp = _origin_iter;
-            // iter tmp = _origin_iter;
-            // return (*(--tmp));
+            iter tmp = _origin_iter;
+            return (*(--tmp));
         }
 
         pointer operator->() const
         {
-            //iter temp_iter = _origin_iter;
-            //return _origin_iter - 1;
             return &(operator*());
         }
 
         reference operator[] (difference_type n) const
         {
             return *(_origin_iter - n - 1);
-            //return _origin_iter[-n - 1];
         }
 
 		Reverse_iterator& operator++()
@@ -61,7 +51,7 @@ namespace ft
 			return *this;
 		}
 
-		Reverse_iterator operator++(int) // 복사본을 던져주므로 레퍼런스 아님.
+		Reverse_iterator operator++(int)
 		{
 			Reverse_iterator temp_riter = *this;
 			++(*this);
@@ -70,7 +60,6 @@ namespace ft
 
         Reverse_iterator operator+(difference_type n) const
         {
-            // 생성자를 이용.
             return Reverse_iterator(_origin_iter - n);
         }
 
@@ -178,22 +167,15 @@ namespace ft
     }
 
     template <typename iter>
-    Reverse_iterator<iter> operator+ 
-        (typename Reverse_iterator<iter>::difference_type n, const Reverse_iterator<iter>& x)
+    Reverse_iterator<iter>
+        operator+ (typename Reverse_iterator<iter>::difference_type n, const Reverse_iterator<iter>& x)
     {
 	    return(x + n);
     }
 
-    // template <typename iter>
-    // typename Reverse_iterator<iter>::difference_type operator- 
-    //     (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
-    // {
-    //     return(lhs.base() - rhs.base());
-    // }
-
     template <typename iter_L, typename iter_R>
     typename Reverse_iterator<iter_L>::difference_type
-        operator-(const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
+        operator- (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
         return(rhs.base() - lhs.base());
     }

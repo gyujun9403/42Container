@@ -19,13 +19,8 @@ namespace ft
         }
 	};
 
-    // is_integral -> int로 처리할 수 있는지 확인.
-    // 아래 탬플릿들에서 안걸리는 경우, ft::integral_constant<bool, false>형을 상속받는 구조체 정의.
     template <typename T>
-    struct is_integral : public ft::integral_constant<bool, false> {}; // T대신 bool쓰면 에러남.
-    // 탬플릿 특수화를 하여 bool, char, ... 등
-    // int로 쓸 수 있는것들이 탬플릿으로 들어온 경우 
-    // ft::integral_constant<bool, true>를 상속받는 구조체 정의
+    struct is_integral : public ft::integral_constant<bool, false> {};
     template <>
     struct is_integral<bool> : public ft::integral_constant<bool, true> {};
     template <>

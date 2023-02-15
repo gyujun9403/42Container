@@ -6,12 +6,10 @@
 
 namespace ft
 {
-    //template <typename T_key, typename T_val>
-    template <class Pair>
+    template <typename Pair>
     class node
     {
     public:
-    
         Pair data;
         node* parents;
         node* child_left;
@@ -23,10 +21,8 @@ namespace ft
 
         node(Pair fair)
         : data(fair), parents(NULL), child_left(NULL), child_right(NULL), temp_height(0), bf(0)
-        {
-            //data = make_pair<const T_key, T_val>(key, data);
-        }
+        {}
     };
-} // namespace ft
+}
 
 #endif

@@ -28,7 +28,7 @@ namespace ft
         explicit stack (const container_type& c = container_type())
 		: _c(c) {}
 	
-		stack(const stack& other)
+		explicit stack(const stack& other)
 		: _c(other._c) {}
 
 		stack& operator=(const stack& other)

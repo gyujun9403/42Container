@@ -31,7 +31,7 @@ namespace ft
     };
 
     template <typename T1, typename T2>
-    bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    bool operator==(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs)
     {
         if (lhs.first == rhs.first && lhs.second == rhs.second)
         {
@@ -41,51 +41,50 @@ namespace ft
     }
 
     template <typename T1, typename T2>
-    bool operator!=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    bool operator!=(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs)
     {
         return !(lhs == rhs);
     }
 
     template <typename T1, typename T2>
-    bool operator<(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    bool operator<(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs)
     {
-        if (lhs.first < rhs.first)
-        {
-            return true;
-        }
-        else
+        if (lhs.first == rhs.first)
         {
             if (lhs.second < rhs.second)
             {
                 return true;
             }
         }
-
+        else if (lhs.first < rhs.first)
+        {
+            return true;
+        }
         return false;
     }
 
     template <typename T1, typename T2>
-    bool operator<=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    bool operator<=(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs)
     {
         return !(rhs < lhs);
     }
 
     template <typename T1, typename T2>
-    bool operator>(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    bool operator>(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs)
     {
         return rhs < lhs;
     }
 
     template <typename T1, typename T2>
-    bool operator>=(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
+    bool operator>=(const ft::pair<T1, T2>& lhs, const ft::pair<T1, T2>& rhs)
     {
         return !(lhs < rhs);
     }
 
     template <typename T1, typename T2>
-    pair<T1, T2> make_pair(T1 first, T2 second)
+    ft::pair<T1, T2> make_pair(T1 first, T2 second)
     {
-        return pair<T1, T2>(first, second);
+        return ft::pair<T1, T2>(first, second);
     }
 }
 

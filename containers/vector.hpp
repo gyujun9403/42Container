@@ -9,23 +9,23 @@
 
 namespace ft
 {
-    template<typename T, typename Alloc = std::allocator<T> >
+    template <typename T, typename Alloc = std::allocator<T> >
     class vector
     {
     public:
-        typedef          T value_type;
-        typedef          Alloc allocator_type;
+        typedef T value_type;
+        typedef Alloc allocator_type;
         typedef typename allocator_type::reference reference;
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-        typedef          std::size_t size_type;
-        typedef          std::ptrdiff_t difference_type;
+        typedef std::size_t size_type;
+        typedef std::ptrdiff_t difference_type;
 
-        typedef          Random_access_iterator<value_type> iterator;
-        typedef          Random_access_iterator<const value_type> const_iterator;
-        typedef          Reverse_iterator<const_iterator> const_reverse_iterator;
-		typedef          Reverse_iterator<iterator> reverse_iterator;
+        typedef Random_access_iterator<value_type> iterator;
+        typedef Random_access_iterator<const value_type> const_iterator;
+        typedef Reverse_iterator<const_iterator> const_reverse_iterator;
+		typedef Reverse_iterator<iterator> reverse_iterator;
 
     private:
         allocator_type  _data_allocator;
@@ -67,7 +67,7 @@ namespace ft
             }
         }
 
-        explicit vector (const vector& x)
+        vector (const vector& x)
         : _data_allocator(x._data_allocator) , _start(NULL), _size(0), _capacity(0)
         {
             operator=(x);
@@ -184,12 +184,12 @@ namespace ft
 
         reference operator[] (size_type n)
         {
-            return (*(_start + n));
+            return *(_start + n);
         }
 
         const_reference operator[] (size_type n) const
         {
-            return (*(_start + n));
+            return *(_start + n);
         }
 
         reference at (size_type n)
@@ -198,7 +198,7 @@ namespace ft
             {
                 throw std::out_of_range("ft::at() out of range");
             }
-            return (*(_start + n));
+            return *(_start + n);
         }
 
         const_reference at (size_type n) const
@@ -207,67 +207,67 @@ namespace ft
             {
                 throw std::out_of_range("ft::at() const out of range");
             }
-            return (*(_start + n));
+            return *(_start + n);
         }
 
         reference front ()
         {
-            return (*_start);
+            return *_start;
         }
 
         const_reference front () const
         {
-            return (*_start);
+            return *_start;
         }
 
         reference back ()
         {
-            return (*(_finish - 1));
+            return *(_finish - 1);
         }
 
         const_reference back () const
         {
-            return (*(_finish - 1));
+            return *(_finish - 1);
         }
 
         iterator begin()
         {
-            return (iterator(_start));
+            return iterator(_start);
         }
 
         const_iterator begin() const
         {
-            return (const_iterator(_start));
+            return const_iterator(_start);
         }
 
         iterator end()
         {
-            return (iterator(_start + _size));
+            return iterator(_start + _size);
         }
 
         const_iterator end() const
         {
-            return (const_iterator(_start + _size));
+            return const_iterator(_start + _size);
         }
 
         reverse_iterator rbegin()
         {
-            return (reverse_iterator(end()));
+            return reverse_iterator(end());
         }
 
         const_reverse_iterator rbegin() const
         {
-            return (const_reverse_iterator(end()));
+            return const_reverse_iterator(end());
         }
 
         reverse_iterator rend()
         {
-            return (reverse_iterator(begin()));
+            return reverse_iterator(begin());
         }
 
         const_reverse_iterator rend() const
         {
-            return (const_reverse_iterator (begin()));
+            return const_reverse_iterator (begin());
         }
 
         template <typename InputIt>
@@ -359,7 +359,7 @@ namespace ft
 				_size++;
                 _finish++;
 			}
-			return (iterator(_start + pos_len));
+			return iterator(_start + pos_len);
 		}
 
         void insert (iterator position, size_type n, const value_type& val)
@@ -414,7 +414,7 @@ namespace ft
 		}
 
 
-        template <class InputIt>
+        template <typename InputIt>
         void insert (iterator position, InputIt first, InputIt last, typename enable_if<!is_integral<InputIt>::value>::type* = 0)
         {
 			size_type pos_len = static_cast<size_type>(&(*position) - _start);

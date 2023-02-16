@@ -1,5 +1,5 @@
-#ifndef BIDIRECTIONAL_ITERATORE_avl_HPP
-# define BIDIRECTIONAL_ITERATORE_avl_HPP
+#ifndef AVL_ITERATOR_HPP
+# define AVL_ITERATOR_HPP
 
 #include "./traits.hpp"
 #include "./utils.hpp"
@@ -152,7 +152,7 @@ namespace ft
         }
     };
 
-    template <typename N, typename P, class Compare >
+    template <typename N, typename P, typename Compare >
 	class Avl_const_iterator
 	{
     public :

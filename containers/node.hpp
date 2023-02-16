@@ -17,7 +17,9 @@ namespace ft
         long long temp_height;
         int bf;
 
-        node() : parents(NULL), child_left(NULL), child_right(NULL), temp_height(0), bf(0) {}
+        node()
+        : parents(NULL), child_left(NULL), child_right(NULL), temp_height(0), bf(0)
+        {}
 
         node(Pair fair)
         : data(fair), parents(NULL), child_left(NULL), child_right(NULL), temp_height(0), bf(0)

@@ -17,12 +17,17 @@ namespace ft
     private:
         iter _origin_iter;
     public:
-        Reverse_iterator() {}
+        Reverse_iterator()
+        {}
+        
         explicit Reverse_iterator(iter other)
-        : _origin_iter(other) {}
+        : _origin_iter(other)
+        {}
+
         template<typename T>
         Reverse_iterator(const Reverse_iterator<T>& other)
-        : _origin_iter(other.base()) {}
+        : _origin_iter(other.base())
+        {}
 
         iter base() const
         {
@@ -32,7 +37,7 @@ namespace ft
         reference operator*() const
         {
             iter tmp = _origin_iter;
-            return (*(--tmp));
+            return *(--tmp);
         }
 
         pointer operator->() const
@@ -97,87 +102,87 @@ namespace ft
     template <typename iter>
     bool operator== (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() == rhs.base());
+        return lhs.base() == rhs.base();
     }
 
     template <typename iter_L, typename iter_R>
     bool operator== (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() == rhs.base());
+        return lhs.base() == rhs.base();
     }
 
     template <typename iter>
     bool operator!= (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() != rhs.base());
+        return lhs.base() != rhs.base();
     }
 
     template <typename iter_L, typename iter_R>
     bool operator!= (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() != rhs.base());
+        return lhs.base() != rhs.base();
     }
 
     template <typename iter>
     bool operator< (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() > rhs.base());
+        return lhs.base() > rhs.base();
     }
 
     template <typename iter_L, typename iter_R>
     bool operator< (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() > rhs.base());
+        return lhs.base() > rhs.base();
     }
 
     template <typename iter>
     bool operator<= (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() >= rhs.base());
+        return lhs.base() >= rhs.base();
     }
 
     template <typename iter_L, typename iter_R>
     bool operator<= (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() >= rhs.base());
+        return lhs.base() >= rhs.base();
     }
 
     template <typename iter>
     bool operator> (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() < rhs.base());
+        return lhs.base() < rhs.base();
     }
 
     template <typename iter_L, typename iter_R>
     bool operator> (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() < rhs.base());
+        return lhs.base() < rhs.base();
     }
 
     template <typename iter>
     bool operator>= (const Reverse_iterator<iter>& lhs, const Reverse_iterator<iter>& rhs)
     {
-        return (lhs.base() <= rhs.base());
+        return lhs.base() <= rhs.base();
     }
 
     template <typename iter_L, typename iter_R>
     bool operator>= (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return (lhs.base() <= rhs.base());
+        return lhs.base() <= rhs.base();
     }
 
     template <typename iter>
     Reverse_iterator<iter>
         operator+ (typename Reverse_iterator<iter>::difference_type n, const Reverse_iterator<iter>& x)
     {
-	    return(x + n);
+	    return x + n;
     }
 
     template <typename iter_L, typename iter_R>
     typename Reverse_iterator<iter_L>::difference_type
         operator- (const Reverse_iterator<iter_L>& lhs, const Reverse_iterator<iter_R>& rhs)
     {
-        return(rhs.base() - lhs.base());
+        return rhs.base() - lhs.base();
     }
 }
 

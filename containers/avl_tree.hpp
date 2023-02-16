@@ -74,7 +74,7 @@ namespace ft
             }
         }
 
-        node_pointer take_successor(const node_pointer root, node_pointer* out_parent)
+        node_pointer take_successor(const node_pointer root, node_pointer* out_from_node)
         {
             node_pointer now_node = root->child_right;
             if (now_node == NULL)
@@ -92,7 +92,7 @@ namespace ft
             connect_node(now_node->parents, now_node->child_right, get_direc_in_parents(now_node));
             //!!!!!
             //now_node->parents->temp_height = get_renewal_height(now_node->parents);
-            out_parent* = now_node->parents;
+            *out_from_node = now_node;
             now_node->parents = NULL;
             now_node->child_right = NULL;
             return now_node;
@@ -116,7 +116,7 @@ namespace ft
             connect_node(now_node->parents, now_node->child_left, get_direc_in_parents(now_node));
             //!!!!!
             //now_node->parents->temp_height = get_renewal_height(now_node->parents);
-            out_parent* = now_node->parents;
+            *out_parent = now_node;
             now_node->parents = NULL;
             now_node->child_left = NULL;
             return now_node;
@@ -465,12 +465,16 @@ namespace ft
 
         void set_balance(node_pointer form_node, node_pointer to_node)
         {
-            if (form_node == to_node)
+            if (form_node == NULL)
             {
                 return ;
             }
             form_node->temp_height = get_renewal_height(form_node);
             set_balance(form_node);
+            if (form_node == to_node)
+            {
+                return ;
+            }
             set_balance(form_node->parents, to_node);
         }
 
@@ -484,6 +488,10 @@ namespace ft
                 if (ptr_node->child_right == NULL)
                 {
                     substitute_node = NULL;
+                    if (from_node != _superior.child_left)
+                    {
+                        from_node = parents;
+                    }
                 }
                 else
                 {
@@ -518,7 +526,8 @@ namespace ft
             _node_allocator.destroy(ptr_node);
             _node_allocator.deallocate(ptr_node, 1);
             //renewal_heights();
-            recur_set_balace(_superior.child_left);
+            set_balance(from_node, _superior.child_left);
+            //recur_set_balace(_superior.child_left);
             --_size;
             //print2D(_superior.child_left);
             return ;

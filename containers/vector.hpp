@@ -175,6 +175,7 @@ namespace ft
                     this->_data_allocator.construct(new_start + i, *(this->_start + i));
                 }
                 this->clear();
+                this->_data_allocator.deallocate(_start, _capacity);
                 this->_start = new_start;
                 this->_finish = new_start + new_size;
                 this->_size = new_size;
@@ -328,7 +329,7 @@ namespace ft
         iterator insert (iterator position, const value_type& val)
         {
 			size_type pos_len = static_cast<size_type>(position - begin());
-            size_type target_len = _size + 1;
+            size_type left_len = _size - pos_len;
 			if (_size == _capacity)
             {
 				_capacity = _capacity * 2 + (_capacity == 0);
@@ -338,23 +339,29 @@ namespace ft
                     _data_allocator.construct(new_start + i, *(_start + i));
                 }
 				_data_allocator.construct(new_start + pos_len, val);
-                for (size_type i = pos_len; i + 1 < target_len; i++)
+                for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(new_start + i + 1, *(_start + i));
+                    _data_allocator.construct(new_start + pos_len + i + 1, *(_start + pos_len + i));
                 }
                 this->clear();
+                this->_data_allocator.deallocate(_start, _capacity);
 				_start = new_start;
-                _size = target_len;
+                _size += 1;
                 _finish = _start + _size;
-                _capacity = target_len;
+                //_capacity = target_len;
 			}
 			else
             {
-				for (size_type i = _size; i > pos_len; i--)
+				// for (size_type i = _size; i > pos_len; i--)
+                // {
+                //     _data_allocator.construct(_start + i, *(_start + i - 1));
+                //     _data_allocator.destroy(_start + i);
+				// }
+                for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(_start + i, *(_start + i - 1));
-                    _data_allocator.destroy(_start + i);
-				}
+                    _data_allocator.construct(_finish + 1 - i, *(_finish - i));
+					_data_allocator.destroy(_finish - i);
+                }
 				_data_allocator.construct(_start + pos_len, val);
 				_size++;
                 _finish++;
@@ -401,8 +408,10 @@ namespace ft
             {
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(_finish + n + i, *(&(*position) + n + i));
-                    _data_allocator.destroy(&(*position) + n + i);
+                    // _data_allocator.construct(_finish + n + i, *(&(*position) + n + i));
+                    // _data_allocator.destroy(&(*position) + n + i);
+                    _data_allocator.construct(_finish + n - i, *(_finish - i));
+					_data_allocator.destroy(_finish - i);
                 }
                 for (size_type i = 0; i < n; i++)
                 {
@@ -420,9 +429,9 @@ namespace ft
 			size_type pos_len = static_cast<size_type>(&(*position) - _start);
             size_type n = static_cast<size_type>(ft::distance(first, last));
 			size_type left_len = _size - pos_len;
-			if (_size + n > _capacity)
+			if (_size + n >= _capacity)
             {
-				size_type new_capacity = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
+				size_type new_capacity = (_capacity * 2 >= _size + n) ? (_capacity * 2) : (_size + n);
 				pointer new_start = _data_allocator.allocate(new_capacity);
                 for (size_type i = 0; i < pos_len; i++)
                 {
@@ -450,15 +459,17 @@ namespace ft
             {
 				for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(_finish + i, *(&(*position) + i));
-					_data_allocator.destroy(&(*position) + i);
+                    //_data_allocator.construct(_finish + i, *(&(*position) + i));
+					//_data_allocator.destroy(&(*position) + i);
+                    _data_allocator.construct(_finish + n - i, *(_finish - i));
+					_data_allocator.destroy(_finish - i);
 				}
 				for (size_type i = 0; i < n; i++)
                 {
 					_data_allocator.construct(&(*position) + i, *(first++));
 				}
 				_size += n;
-                _finish += n;
+                _finish = _start + n;
 			}
 		}
 

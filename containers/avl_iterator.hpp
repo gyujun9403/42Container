@@ -7,7 +7,7 @@
 
 namespace ft
 {
-    template <typename N, typename P, typename Compare>
+    template <typename N, typename P>//, typename Compare>
     class Avl_iterator
     {
     public:
@@ -23,17 +23,26 @@ namespace ft
 
     private:
         node_pointer _node;
-        Compare _comp;
+        //Compare _comp;
 
     public:
-        Avl_iterator(const Compare& comp = Compare())
-        : _node(NULL), _comp(comp)
+        // Avl_iterator(const Compare& comp = Compare())
+        // : _node(NULL), _comp(comp)
+        // {}
+        // Avl_iterator(const node_pointer node, const Compare& comp = Compare())
+        // : _node(static_cast<node_pointer>(node)), _comp(comp)
+        // {}
+        // Avl_iterator(const Avl_iterator<node_type, typename ft::remove_const<value_type>::type, Compare>& other)
+        // : _node(other.base()), _comp(other.get_compare())
+        // {}
+        Avl_iterator()
+        : _node(NULL)
         {}
-        Avl_iterator(const node_pointer node, const Compare& comp = Compare())
-        : _node(static_cast<node_pointer>(node)), _comp(comp)
+        Avl_iterator(const node_pointer node)
+        : _node(static_cast<node_pointer>(node))
         {}
-        Avl_iterator(const Avl_iterator<node_type, typename ft::remove_const<value_type>::type, Compare>& other)
-        : _node(other.base()), _comp(other.get_compare())
+        Avl_iterator(const Avl_iterator<node_type, typename ft::remove_const<value_type>::type>& other)
+        : _node(other.base())
         {}
 
         node_pointer base() const
@@ -41,19 +50,19 @@ namespace ft
             return _node;
         }
 
-        Compare get_compare() const
-        {
-            return _comp;
-        }
+        // Compare get_compare() const
+        // {
+        //     return _comp;
+        // }
 
-        Avl_iterator& operator=(const Avl_iterator<node_type, typename remove_const<value_type>::type, Compare>& other)
+        Avl_iterator& operator=(const Avl_iterator<node_type, typename remove_const<value_type>::type>& other)
         {
             if (this == &other)
             {
                 return *this;
             }
             _node = other._node;
-            _comp = other._comp;
+            //_comp = other._comp;
             return *this;
         }
 
@@ -71,16 +80,21 @@ namespace ft
         {
             if (_node->child_right == NULL)
             {
-                node_pointer now_node = _node;
+                node_pointer now_node;
+                node_pointer parent_node = _node;
                 while(1)
                 {
-                    if (now_node->parents == NULL)
+                    now_node = parent_node;
+                    parent_node = now_node->parents;
+                    if (parent_node == NULL)
                     {
                         break ;
                     }
-                    now_node = now_node->parents;
-                    if (_comp(_node->data.first, now_node->data.first))
+                    //now_node = now_node->parents;
+                    //if (_comp(_node->data.first, now_node->data.first))
+                    if (now_node == parent_node->child_left)
                     {
+                        now_node = parent_node;
                         break ;
                     }
                 }
@@ -108,16 +122,19 @@ namespace ft
         {
             if (_node->child_left == NULL)
             {
-                node_pointer now_node = _node;
+                node_pointer now_node;
+                node_pointer parent_node = _node;
                 while(1)
                 {
-                    if (now_node->parents == NULL)
+                    now_node = parent_node;
+                    parent_node = now_node->parents;
+                    if (parent_node == NULL)
                     {
                         break ;
                     }
-                    now_node = now_node->parents;
-                    if (_comp(now_node->data.first, _node->data.first))
+                    if (now_node == parent_node->child_right)
                     {
+                        now_node = parent_node;
                         break ;
                     }
                 }
@@ -152,7 +169,7 @@ namespace ft
         }
     };
 
-    template <typename N, typename P, typename Compare >
+    template <typename N, typename P>//, typename Compare >
 	class Avl_const_iterator
 	{
     public :
@@ -161,30 +178,46 @@ namespace ft
         typedef typename ft::iterator_traits<P*>::value_type value_type;
         typedef typename ft::iterator_traits<P*>::pointer pointer;
         typedef typename ft::iterator_traits<P*>::reference reference;
-        typedef ft::Avl_iterator<N, typename ft::remove_const<P>::type, Compare> org_iterator_type;
+        //typedef ft::Avl_iterator<N, typename ft::remove_const<P>::type, Compare> org_iterator_type;
+        typedef ft::Avl_iterator<N, typename ft::remove_const<P>::type> org_iterator_type;
         typedef N node_type;
         typedef node_type* node_pointer;
         typedef std::size_t size_type;
 
     private:
         node_pointer _node;
-        Compare _comp;
+        //Compare _comp;
 
         public:
-        Avl_const_iterator(const Compare& comp = Compare())
-        : _node(), _comp(comp)
+        // Avl_const_iterator(const Compare& comp = Compare())
+        // : _node(), _comp(comp)
+        // {}
+
+        // Avl_const_iterator(const node_pointer node_p, const Compare& comp = Compare())
+        // : _node(node_p), _comp(comp)
+        // {}
+
+        // Avl_const_iterator(const Avl_const_iterator& other)
+        // : _node(other.base()), _comp(other.get_compare())
+        // {}
+
+        // Avl_const_iterator(const org_iterator_type& other)
+        // : _node(other.base()), _comp(other.get_compare())
+        // {}
+        Avl_const_iterator()
+        : _node()
         {}
 
-        Avl_const_iterator(const node_pointer node_p, const Compare& comp = Compare())
-        : _node(node_p), _comp(comp)
+        Avl_const_iterator(const node_pointer node_p)
+        : _node(node_p)
         {}
 
         Avl_const_iterator(const Avl_const_iterator& other)
-        : _node(other.base()), _comp(other.get_compare())
+        : _node(other.base())
         {}
 
         Avl_const_iterator(const org_iterator_type& other)
-        : _node(other.base()), _comp(other.get_compare())
+        : _node(other.base())
         {}
 
         virtual ~Avl_const_iterator()
@@ -195,10 +228,10 @@ namespace ft
             return _node;
         }
 
-        Compare get_compare() const
-        {
-            return _comp;
-        }            
+        // Compare get_compare() const
+        // {
+        //     return _comp;
+        // }            
 
         Avl_const_iterator &operator=(const Avl_const_iterator& other)
         {
@@ -207,7 +240,7 @@ namespace ft
                 return *this;
             }
             this->_node = other._node;
-            this->_comp = other._comp;
+            //this->_comp = other._comp;
             return *this;
         }
 
@@ -235,16 +268,21 @@ namespace ft
         {
             if (_node->child_right == NULL)
             {
-                node_pointer now_node = _node;
+                node_pointer now_node;
+                node_pointer parent_node = _node;
                 while(1)
                 {
-                    if (now_node->parents == NULL)
+                    now_node = parent_node;
+                    parent_node = now_node->parents;
+                    if (parent_node == NULL)
                     {
                         break ;
                     }
-                    now_node = now_node->parents;
-                    if (_comp(_node->data.first, now_node->data.first))
+                    //now_node = now_node->parents;
+                    //if (_comp(_node->data.first, now_node->data.first))
+                    if (now_node == parent_node->child_left)
                     {
+                        now_node = parent_node;
                         break ;
                     }
                 }
@@ -272,16 +310,19 @@ namespace ft
         {
             if (_node->child_left == NULL)
             {
-                node_pointer now_node = _node;
+                node_pointer now_node;
+                node_pointer parent_node = _node;
                 while(1)
                 {
-                    if (now_node->parents == NULL)
+                    now_node = parent_node;
+                    parent_node = now_node->parents;
+                    if (parent_node == NULL)
                     {
                         break ;
                     }
-                    now_node = now_node->parents;
-                    if (_comp(now_node->data.first, _node->data.first))
+                    if (now_node == parent_node->child_right)
                     {
+                        now_node = parent_node;
                         break ;
                     }
                 }

@@ -34,8 +34,10 @@ namespace ft
         typedef Compare value_compare;
         typedef Alloc allocator_type;
 
-        typedef Avl_iterator<node_type, value_type, Compare> iterator;
-		typedef Avl_iterator<node_type, const value_type, Compare> const_iterator;
+        // typedef Avl_iterator<node_type, value_type, Compare> iterator;
+		// typedef Avl_iterator<node_type, const value_type, Compare> const_iterator;
+        typedef Avl_iterator<node_type, value_type> iterator;
+		typedef Avl_iterator<node_type, const value_type> const_iterator;
 		typedef	ft::Reverse_iterator<iterator> reverse_iterator;
 		typedef	ft::Reverse_iterator<const_iterator> const_reverse_iterator;
         typedef typename Alloc::template rebind<node_type>::other node_allocator;

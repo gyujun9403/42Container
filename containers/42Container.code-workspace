@@ -6,7 +6,8 @@
     ],
     "settings": {
         "files.associations": {
-            "stack": "cpp"
+            "stack": "cpp",
+            "*.ipp": "cpp"
         }
     }
 }

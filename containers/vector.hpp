@@ -330,10 +330,11 @@ namespace ft
         {
 			size_type pos_len = static_cast<size_type>(position - begin());
             size_type left_len = _size - pos_len;
+
 			if (_size == _capacity)
             {
-				_capacity = _capacity * 2 + (_capacity == 0);
-				pointer new_start = _data_allocator.allocate(_capacity);
+                size_type new_capacity = _capacity * 2 + (_capacity == 0);
+				pointer new_start = _data_allocator.allocate(new_capacity);
 				for (size_type i = 0; i < pos_len; i++)
                 {
                     _data_allocator.construct(new_start + i, *(_start + i));
@@ -343,24 +344,23 @@ namespace ft
                 {
                     _data_allocator.construct(new_start + pos_len + i + 1, *(_start + pos_len + i));
                 }
-                this->clear();
+                //this->clear();
+                for (size_type i = 0; i < _size; i++)
+                {
+					_data_allocator.destroy(_start + i);
+                }
                 this->_data_allocator.deallocate(_start, _capacity);
 				_start = new_start;
                 _size += 1;
                 _finish = _start + _size;
-                //_capacity = target_len;
+                _capacity = new_capacity;
 			}
 			else
             {
-				// for (size_type i = _size; i > pos_len; i--)
-                // {
-                //     _data_allocator.construct(_start + i, *(_start + i - 1));
-                //     _data_allocator.destroy(_start + i);
-				// }
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(_finish + 1 - i, *(_finish - i));
-					_data_allocator.destroy(_finish - i);
+                    _data_allocator.construct(_finish - i, *(_finish - i - 1));
+					_data_allocator.destroy(_finish - i - 1);
                 }
 				_data_allocator.construct(_start + pos_len, val);
 				_size++;
@@ -408,10 +408,8 @@ namespace ft
             {
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    // _data_allocator.construct(_finish + n + i, *(&(*position) + n + i));
-                    // _data_allocator.destroy(&(*position) + n + i);
-                    _data_allocator.construct(_finish + n - i, *(_finish - i));
-					_data_allocator.destroy(_finish - i);
+                    _data_allocator.construct(_finish + n - i - 1, *(_finish - i - 1));
+					_data_allocator.destroy(_finish - i - 1);
                 }
                 for (size_type i = 0; i < n; i++)
                 {
@@ -426,24 +424,29 @@ namespace ft
         template <typename InputIt>
         void insert (iterator position, InputIt first, InputIt last, typename enable_if<!is_integral<InputIt>::value>::type* = 0)
         {
-			size_type pos_len = static_cast<size_type>(&(*position) - _start);
-            size_type n = static_cast<size_type>(ft::distance(first, last));
-			size_type left_len = _size - pos_len;
-			if (_size + n >= _capacity)
+  			if (position < this->begin() || position > this->end())
             {
-				size_type new_capacity = (_capacity * 2 >= _size + n) ? (_capacity * 2) : (_size + n);
+				return ;
+            }
+            size_type n = static_cast<size_type>(ft::distance(first, last));
+			size_type pos_len = static_cast<size_type>(&(*position) - _start);
+            size_type left_len = static_cast<size_type>(_finish - &(*position));
+			if (_size + n > _capacity)
+            {
+				size_type new_capacity = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
 				pointer new_start = _data_allocator.allocate(new_capacity);
                 for (size_type i = 0; i < pos_len; i++)
                 {
                     _data_allocator.construct(new_start + i, *(_start + i));
                 }
+				pointer temp_start = new_start + pos_len;
                 for (size_type i = 0; i < n; i++)
                 {
-                    _data_allocator.construct(new_start + pos_len + i, *(first++));
+                    _data_allocator.construct(temp_start + i, *(first + i));
                 }
                 for (size_type i = 0; i < left_len; i++)
                 {
-                    _data_allocator.construct(new_start + pos_len + n + i, *(_start + pos_len + i));
+                    _data_allocator.construct(temp_start + n + i, *(&(*position) + i));
                 }
 				for (size_type i = 0; i < _size; i++)
                 {
@@ -453,23 +456,21 @@ namespace ft
 				_size += n;
 				_capacity = new_capacity;
 				_start = new_start;
-                _finish = _start + _size;
+                _finish = new_start + _size;
 			}
 			else
             {
-				for (size_type i = 0; i < left_len; i++)
+                for (size_type i = 0; i < left_len; i++)
                 {
-                    //_data_allocator.construct(_finish + i, *(&(*position) + i));
-					//_data_allocator.destroy(&(*position) + i);
-                    _data_allocator.construct(_finish + n - i, *(_finish - i));
-					_data_allocator.destroy(_finish - i);
-				}
-				for (size_type i = 0; i < n; i++)
+                    _data_allocator.construct(_finish + n - i - 1, *(_finish - i - 1));
+					_data_allocator.destroy(_finish - i - 1);
+                }
+                for (size_type i = 0; i < n; i++)
                 {
-					_data_allocator.construct(&(*position) + i, *(first++));
-				}
+                    _data_allocator.construct(&(*position) + i, *(first + i));
+                }
 				_size += n;
-                _finish = _start + n;
+                _finish += n;
 			}
 		}
 

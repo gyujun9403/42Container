@@ -39,7 +39,7 @@ namespace ft
         : _node(NULL)
         {}
         Avl_iterator(const node_pointer node)
-        : _node(static_cast<node_pointer>(node))
+        : _node(node)
         {}
         Avl_iterator(const Avl_iterator<node_type, typename ft::remove_const<value_type>::type>& other)
         : _node(other.base())

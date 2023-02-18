@@ -97,7 +97,7 @@ namespace ft
             {
                 throw std::out_of_range("map::at(const Key& key)");
             }
-            return iterator(node);
+            return node->data.second;
         }
 
         const mapped_type& at(const Key& key) const
@@ -107,7 +107,7 @@ namespace ft
             {
                 throw std::out_of_range("map::at(const Key& key) const");
             }
-            return const_iterator(node);
+            return node->data.second;
         }
 
         mapped_type& operator[](const Key& key)
@@ -339,13 +339,14 @@ namespace ft
         {
             typename ft::map<Key, T, Compare, Alloc>::const_iterator lit = lhs.begin();
             typename ft::map<Key, T, Compare, Alloc>::const_iterator leit = lhs.end();
-            typename ft::map<Key, T, Compare, Alloc>::const_iterator rit = lhs.begin();
-            for (;lit != leit;++lit)
+            typename ft::map<Key, T, Compare, Alloc>::const_iterator rit = rhs.begin();
+            while (lit != leit)
             {
-                if (lit->first != rit->first || lit->second != rit->second )
+                if (*lit != *rit)
                 {
                     return false;
                 }
+                ++lit;
                 ++rit;
             }
             return true;

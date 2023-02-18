@@ -1,116 +1,143 @@
 #include <iostream>
-#include <string>
-#include <deque>
-#if 0 //CREATE A REAL STL EXAMPLE
-	#include <map>
-	#include <stack>
-	#include <vector>
-	namespace ft = std;
+#include "containers/vector.hpp"
+
+#ifdef FAST
+int _ratio = 1;
 #else
-	#include "./containers/map.hpp"
-	#include "./containers/stack.hpp"
-	#include "./containers/vector.hpp"
+int _ratio = 10000;
 #endif
 
-#include <stdlib.h>
+int _allocator_used = 0;
 
-#define MAX_RAM 4294967296
-#define BUFFER_SIZE 4096
-struct Buffer
-{
-	int idx;
-	char buff[BUFFER_SIZE];
-};
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <stack>
+#include <deque>
+#include <fstream>
+#include <execinfo.h>
+#include <iomanip>
+#include <sys/time.h>
+#include <sstream>
+#include <unistd.h>
+#include <iostream>
+#include <csignal>
+#include <unistd.h>
+#include <fcntl.h>
 
+time_t timer() {
+	struct timeval start = {};
+	gettimeofday(&start, nullptr);
+	time_t msecs_time = (start.tv_sec * 1000) + (start.tv_usec / 1000);
+	return msecs_time;
+}
 
-#define COUNT (MAX_RAM / (int)sizeof(Buffer))
-
-template<typename T>
-class MutantStack : public ft::stack<T>
-{
+class B {
 public:
-	MutantStack() {}
-	MutantStack(const MutantStack<T>& src) { *this = src; }
-	MutantStack<T>& operator=(const MutantStack<T>& rhs) 
-	{
-		this->c = rhs.c;
-		return *this;
-	}
-	~MutantStack() {}
-
-	typedef typename ft::stack<T>::container_type::iterator iterator;
-
-	iterator begin() { return this->c.begin(); }
-	iterator end() { return this->c.end(); }
+    char *l;
+    int i;
+    B():l(nullptr), i(1) {};
+    B(const int &ex) {
+        this->i = ex;
+        this->l = new char('a');
+    };
+    virtual ~B() {
+        delete this->l;
+        this->l = nullptr;
+    };
 };
 
-int main(int argc, char** argv) {
-	if (argc != 2)
-	{
-		std::cerr << "Usage: ./test seed" << std::endl;
-		std::cerr << "Provide a seed please" << std::endl;
-		std::cerr << "Count value:" << COUNT << std::endl;
-		return 1;
-	}
-	const int seed = atoi(argv[1]);
-	srand(seed);
+class A : public B {
+public:
+    A():B(){};
+    A(const B* ex){
+        this->l = new char(*(ex->l));
+        this->i = ex->i;
+        if (ex->i == -1) throw "n";
+    }
+    ~A() {
+        delete this->l;
+        this->l = nullptr;
+    };
+};
 
-	ft::vector<std::string> vector_str;
-	ft::vector<int> vector_int;
-	ft::stack<int> stack_int;
-	ft::vector<Buffer> vector_buffer;
-	ft::stack<Buffer, std::deque<Buffer> > stack_deq_buffer;
-	ft::map<int, int> map_int;
-
-	for (int i = 0; i < COUNT; i++)
-	{
-		vector_buffer.push_back(Buffer());
-	}
-
-	for (int i = 0; i < COUNT; i++)
-	{
-		const int idx = rand() % COUNT;
-		vector_buffer[idx].idx = 5;
-	}
-	ft::vector<Buffer>().swap(vector_buffer);
-
-	try
-	{
-		for (int i = 0; i < COUNT; i++)
-		{
-			const int idx = rand() % COUNT;
-			vector_buffer.at(idx);
-			std::cerr << "Error: THIS VECTOR SHOULD BE EMPTY!!" <<std::endl;
-		}
-	}
-	catch(const std::exception& e)
-	{
-		//NORMAL ! :P
-	}
+template <typename T>
+std::vector<int> insert_test_2(std::vector<T> vector)
+{
+    std::vector<int> v;
+    std::vector<int> tmp;
+    tmp.assign(2600 * _ratio, 1);
+    vector.assign(4200 * _ratio, 1);
+    vector.insert(vector.end() - 1000 * _ratio, tmp.begin(), tmp.end());
+    v.push_back(vector[3]);
+    v.push_back(vector.size());
+    v.push_back(vector.capacity());
+    std::unique_ptr<B> k2(new B(3));
+    std::unique_ptr<B> k3(new B(4));
+    std::unique_ptr<B> k4(new B(-1));
+    std::vector<A> vv;
+    std::vector<B*> v1;
 	
-	for (int i = 0; i < COUNT; ++i)
+    v1.push_back(&(*k2));
+    v1.push_back(&(*k3));
+    v1.push_back(&(*k4));
+    try
 	{
-		map_int.insert(ft::make_pair(rand(), rand()));
+		vv.insert(vv.begin(), v1.begin(), v1.end());
 	}
+    catch (...)
+	{
+		//std::cout << e.what() << std::endl;
+        v.push_back(vv.size());
+        v.push_back(vv.capacity());
+    }
+    return v;
+}
 
-	int sum = 0;
-	for (int i = 0; i < 10000; i++)
+template <typename T>
+std::vector<int> insert_test_3(ft::vector<T> vector)
+{
+    std::vector<int> v;
+    ft::vector<int> tmp;
+    tmp.assign(2600 * _ratio, 1);
+    vector.assign(4200 * _ratio, 1);
+    vector.insert(vector.end() - 1000 * _ratio, tmp.begin(), tmp.end());
+    v.push_back(vector[3]);
+    v.push_back(vector.size());
+    v.push_back(vector.capacity());
+    std::unique_ptr<B> k2(new B(3));
+    std::unique_ptr<B> k3(new B(4));
+    std::unique_ptr<B> k4(new B(-1));
+    ft::vector<A> vv;
+    ft::vector<B*> v1;
+	
+    v1.push_back(&(*k2));
+    v1.push_back(&(*k3));
+    v1.push_back(&(*k4));
+    try
 	{
-		int access = rand();
-		sum += map_int[access];
+		vv.insert(vv.begin(), v1.begin(), v1.end());
 	}
-	std::cout << "should be constant with the same seed: " << sum << std::endl;
+    catch (...)
+	{
+		//std::cout << e.what() << std::endl;
+        v.push_back(vv.size());
+        v.push_back(vv.capacity());
+    }
+    return v;
+}
 
-	{
-		ft::map<int, int> copy = map_int;
-	}
-	MutantStack<char> iterable_stack;
-	for (char letter = 'a'; letter <= 'z'; letter++)
-		iterable_stack.push(letter);
-	for (MutantStack<char>::iterator it = iterable_stack.begin(); it != iterable_stack.end(); it++)
-	{
-		std::cout << *it;
-	}
-	std::cout << std::endl;
-	return (0);
+int main()
+{
+	std::vector<int> std_vector;
+	ft::vector<int> ft_vector;
+	// std::vector<int> rt = insert_test_2(std_vector);
+	// std::cout << "****************STD****************" << std::endl;
+	// system("leaks unit_main_test.out");
+    std::vector<int> rt2 = insert_test_3(ft_vector);
+	std::cout << "****************FD****************" << std::endl;
+	system("leaks unit_main_test.out");
+	//system("leaks unit_main_test.out");
+	return 0;
 }

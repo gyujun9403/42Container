@@ -22,7 +22,7 @@ namespace ft
 		: c(c)
 		{}
 	
-		explicit stack(const stack& other)
+		stack(const stack& other)
 		: c(other.c)
 		{}
 

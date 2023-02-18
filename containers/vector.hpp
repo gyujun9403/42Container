@@ -60,11 +60,23 @@ namespace ft
             _capacity = _size;
             _start = _data_allocator.allocate(_capacity);
             _finish = _start;
-            while (n--)
+            try
             {
-                _data_allocator.construct(_finish, *(first++));
-                _finish++;
+                while (n--)
+                {
+                    _data_allocator.construct(_finish, *(first++));
+                    _finish++;
+                }
             }
+            catch (...)
+            {
+                for (size_type i = 0; i < _size; ++i)
+                {
+                    _data_allocator.destroy(_start + i);
+                }
+                _data_allocator.deallocate(_start, _capacity);
+                throw;
+            }  
         }
 
         vector (const vector& x)
@@ -279,11 +291,24 @@ namespace ft
             _size = n;
             this->clear();
             this->resize(n);
-            while (n--)
+            try
             {
-                _data_allocator.construct(_finish, *(first++));
-                _finish++;
+                while (n--)
+                {
+                    _data_allocator.construct(_finish, *(first++));
+                    _finish++;
+                }
             }
+            catch (...)
+            {
+                for (size_type i = 0; i < _size; ++i)
+                {
+                    _data_allocator.destroy(_start + i);
+                }
+                _data_allocator.deallocate(_start, _capacity);
+                throw;
+            }  
+ 
         }
 
         void assign (size_type n, const value_type& val)
@@ -344,7 +369,6 @@ namespace ft
                 {
                     _data_allocator.construct(new_start + pos_len + i + 1, *(_start + pos_len + i));
                 }
-                //this->clear();
                 for (size_type i = 0; i < _size; i++)
                 {
 					_data_allocator.destroy(_start + i);
@@ -431,7 +455,7 @@ namespace ft
             size_type n = static_cast<size_type>(ft::distance(first, last));
 			size_type pos_len = static_cast<size_type>(&(*position) - _start);
             size_type left_len = static_cast<size_type>(_finish - &(*position));
-			if (_size + n > _capacity)
+			if (_size + n >= _capacity)
             {
 				size_type new_capacity = _capacity * 2 >= _size + n ? _capacity * 2 : _size + n;
 				pointer new_start = _data_allocator.allocate(new_capacity);
@@ -440,10 +464,23 @@ namespace ft
                     _data_allocator.construct(new_start + i, *(_start + i));
                 }
 				pointer temp_start = new_start + pos_len;
-                for (size_type i = 0; i < n; i++)
+                try
                 {
-                    _data_allocator.construct(temp_start + i, *(first + i));
-                }
+					for (size_type i = 0; i < n; i++)
+                    {
+                        _data_allocator.construct(temp_start + i, *(first));
+                        ++first;
+                    } 
+				}
+				catch (...)
+                {
+					for (size_type i = 0; i < n; ++i)
+                    {
+						_data_allocator.destroy(temp_start + i);
+                    }
+					_data_allocator.deallocate(temp_start, new_capacity);
+					throw;
+				}    
                 for (size_type i = 0; i < left_len; i++)
                 {
                     _data_allocator.construct(temp_start + n + i, *(&(*position) + i));
@@ -467,7 +504,7 @@ namespace ft
                 }
                 for (size_type i = 0; i < n; i++)
                 {
-                    _data_allocator.construct(&(*position) + i, *(first + i));
+                    _data_allocator.construct(&(*position) + i, *(first++));
                 }
 				_size += n;
                 _finish += n;

@@ -179,7 +179,6 @@ namespace ft
             if (rt_ptr == NULL)
             {
                 rt_ptr = _tree.insert(value.first, value.second);
-                //rt_ptr = _tree.new_insert(value.first, value.second);
                 rt_bool = true;
             }
             return ft::make_pair<iterator, bool>(iterator(&(*rt_ptr)), rt_bool);
@@ -193,7 +192,6 @@ namespace ft
             if (rt_ptr == NULL)
             {
                 rt_ptr = _tree.insert(value.first, value.second);
-                //rt_ptr = _tree.new_insert(value.first, value.second);
             }
             return iterator(&(*rt_ptr));
         }
@@ -204,7 +202,6 @@ namespace ft
             while (first != last)
             {
                 _tree.insert(first->first, first->second);
-                //_tree.new_insert(first->first, first->second);
                 first++;
             }
         }

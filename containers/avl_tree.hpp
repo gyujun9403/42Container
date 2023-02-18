@@ -34,8 +34,6 @@ namespace ft
         typedef Compare value_compare;
         typedef Alloc allocator_type;
 
-        // typedef Avl_iterator<node_type, value_type, Compare> iterator;
-		// typedef Avl_iterator<node_type, const value_type, Compare> const_iterator;
         typedef Avl_iterator<node_type, value_type> iterator;
 		typedef Avl_iterator<node_type, const value_type> const_iterator;
 		typedef	ft::Reverse_iterator<iterator> reverse_iterator;
@@ -92,8 +90,6 @@ namespace ft
                 now_node = now_node->child_left;
             }
             connect_node(now_node->parents, now_node->child_right, get_direc_in_parents(now_node));
-            //!!!!!
-            //now_node->parents->temp_height = get_renewal_height(now_node->parents);
             *out_from_node = now_node;
             now_node->parents = NULL;
             now_node->child_right = NULL;
@@ -116,8 +112,6 @@ namespace ft
                 now_node = now_node->child_right;
             }
             connect_node(now_node->parents, now_node->child_left, get_direc_in_parents(now_node));
-            //!!!!!
-            //now_node->parents->temp_height = get_renewal_height(now_node->parents);
             *out_parent = now_node;
             now_node->parents = NULL;
             now_node->child_left = NULL;
@@ -184,7 +178,6 @@ namespace ft
             connect_node(y, x, RIGHT);
             x->temp_height = get_renewal_height(x);
             y->temp_height = get_renewal_height(y);
-            //renewal_heights();
         }
 
         void rotate_l(node_pointer x)
@@ -202,7 +195,6 @@ namespace ft
             }
             connect_node(x, two, RIGHT);
             connect_node(y, x, LEFT);
-            //renewal_heights();
             x->temp_height = get_renewal_height(x);
             y->temp_height = get_renewal_height(y);
         }
@@ -219,20 +211,6 @@ namespace ft
             }
         }
 
-        // void recur_set_height(node_pointer ptr_node)
-        // {
-        //     if (ptr_node == NULL)
-        //     {
-        //         return ;
-        //     }
-        //     recur_set_height(ptr_node->child_left);
-        //     recur_set_height(ptr_node->child_right);
-        //     long long left_height = get_height(ptr_node->child_left);
-        //     long long right_height = get_height(ptr_node->child_right);
-        //     ptr_node->temp_height = (left_height > right_height) ? (left_height + 1) : (right_height + 1);
-        //     ptr_node->bf = left_height - right_height;
-        // }
-
         long long get_bf(node_pointer ptr_node)
         {
             long long l_height = (ptr_node->child_left == NULL) ? (0) : (ptr_node->child_left->temp_height);
@@ -240,58 +218,100 @@ namespace ft
             return l_height - r_height;
         }
 
-        // void recur_set_balace(node_pointer ptr_node)
-        // {
-        //     long long bf;
-        //     if (ptr_node == NULL)
-        //     {
-        //         return ;
-        //     }
-        //     recur_set_balace(ptr_node->child_left);
-        //     recur_set_balace(ptr_node->child_right);
-        //     ptr_node->temp_height = get_renewal_height(ptr_node);
-        //     bf = get_bf(ptr_node);
-        //     //if (ptr_node->bf > 1)
-        //     if (bf > 1)
-        //     {
-        //         long long lleft_height = get_height(ptr_node->child_left->child_left);
-        //         long long lright_height = get_height(ptr_node->child_left->child_right);
-        //         if (lleft_height > lright_height)
-        //         {
-        //             rotate_r(ptr_node); // ll
-        //         }
-        //         else
-        //         {
-        //             rotate_l(ptr_node->child_left); // lr
-        //             rotate_r(ptr_node);
-        //         }
-        //     }
-        //     //else if (ptr_node->bf < -1)
-        //     else if (bf < -1)
-        //     {
-        //         long long rleft_height = get_height(ptr_node->child_right->child_left);
-        //         long long rright_height = get_height(ptr_node->child_right->child_right);
-        //         if (rleft_height > rright_height)
-        //         {
-        //             rotate_r(ptr_node->child_right); // rl
-        //             rotate_l(ptr_node);
-        //         }
-        //         else
-        //         {
-        //             rotate_l(ptr_node); // rr
-        //         }
-        //     }
-        //     else
-        //     {
-        //         return ;
-        //     }
-        //     //recur_set_height(_superior.child_left);
-        // }
+        void set_balance(node_pointer ptr_node)
+        {
+            int bf;
+            ptr_node->temp_height = get_renewal_height(ptr_node);
+            if (ptr_node->temp_height < 2)
+            {
+                return ;
+            }
+            bf = get_bf(ptr_node);
+            if (bf > 1)
+            {
+                long long lleft_height = get_height(ptr_node->child_left->child_left);
+                long long lright_height = get_height(ptr_node->child_left->child_right);
+                if (lleft_height > lright_height)
+                {
+                    rotate_r(ptr_node); // ll
+                }
+                else
+                {
+                    rotate_l(ptr_node->child_left); // lr
+                    rotate_r(ptr_node);
+                }
+            }
+            else if (bf < -1)
+            {
+                long long rleft_height = get_height(ptr_node->child_right->child_left);
+                long long rright_height = get_height(ptr_node->child_right->child_right);
+                if (rleft_height > rright_height)
+                {
+                    rotate_r(ptr_node->child_right); // rl
+                    rotate_l(ptr_node);
+                }
+                else
+                {
+                    rotate_l(ptr_node); // rr
+                }
+            }
+            else
+            {
+                return ;
+            }
+        }
 
-        // void renewal_heights()
-        // {
-        //     recur_set_height(_superior.child_left);
-        // }
+                void set_balance(node_pointer form_node, node_pointer to_node)
+        {
+            if (form_node == NULL)
+            {
+                return ;
+            }
+            form_node->temp_height = get_renewal_height(form_node);
+            set_balance(form_node);
+            if (form_node == to_node)
+            {
+                return ;
+            }
+            set_balance(form_node->parents, to_node);
+        }
+
+        node_pointer req_insert(T_key key, T_val value, node_pointer node)
+        {
+            node_pointer rt_node_ptr;
+            if (_compare(key, node->data.first))
+            {
+                if (node->child_left == NULL)
+                {
+                    connect_node(node, allocate_node(key, value), LEFT);
+                    ++_size;
+                    rt_node_ptr = node->child_left;
+                }
+                else
+                {
+                    rt_node_ptr = req_insert(key, value, node->child_left);
+                }
+            }
+            else if (_compare(node->data.first, key))
+            {
+                if (node->child_right == NULL)
+                {
+                    connect_node(node, allocate_node(key, value), RIGHT);
+                    ++_size;
+                    rt_node_ptr = node->child_right;
+                }
+                else
+                {
+                    rt_node_ptr = req_insert(key, value, node->child_right);
+                }
+            }
+            else
+            {
+                return node;
+            }
+            set_balance(node);
+            return rt_node_ptr;
+        }
 
     public:
         avl_tree (const Compare& comp = Compare(), const allocator_type& alloc = allocator_type())
@@ -315,90 +335,6 @@ namespace ft
             clear();
         }
 
-
-        void set_balance(node_pointer ptr_node)
-        {
-            int bf;
-            ptr_node->temp_height = get_renewal_height(ptr_node);
-            if (ptr_node->temp_height < 2)
-            {
-                return ;
-            }
-            bf = get_bf(ptr_node);
-            //if (ptr_node->bf > 1)
-            if (bf > 1)
-            {
-                long long lleft_height = get_height(ptr_node->child_left->child_left);
-                long long lright_height = get_height(ptr_node->child_left->child_right);
-                if (lleft_height > lright_height)
-                {
-                    rotate_r(ptr_node); // ll
-                }
-                else
-                {
-                    rotate_l(ptr_node->child_left); // lr
-                    rotate_r(ptr_node);
-                }
-            }
-            //else if (ptr_node->bf < -1)
-            else if (bf < -1)
-            {
-                long long rleft_height = get_height(ptr_node->child_right->child_left);
-                long long rright_height = get_height(ptr_node->child_right->child_right);
-                if (rleft_height > rright_height)
-                {
-                    rotate_r(ptr_node->child_right); // rl
-                    rotate_l(ptr_node);
-                }
-                else
-                {
-                    rotate_l(ptr_node); // rr
-                }
-            }
-            else
-            {
-                return ;
-            }
-        }
-
-        node_pointer req_insert(T_key key, T_val value, node_pointer node)
-        {
-            node_pointer rt_node_ptr;
-            if (_compare(key, node->data.first)) // 넣을게 지금보다 작음 -> 왼
-            {
-                if (node->child_left == NULL)
-                {
-                    connect_node(node, allocate_node(key, value), LEFT);
-                    ++_size;
-                    rt_node_ptr = node->child_left;
-                }
-                else
-                {
-                    rt_node_ptr = req_insert(key, value, node->child_left);
-                }
-            }
-            else if (_compare(node->data.first, key)) // 넣을게 지금보다 큼 -> 오
-            {
-                if (node->child_right == NULL)
-                {
-                    connect_node(node, allocate_node(key, value), RIGHT);
-                    ++_size;
-                    rt_node_ptr = node->child_right;
-                }
-                else
-                {
-                    rt_node_ptr = req_insert(key, value, node->child_right);
-                }
-            }
-            else // 같은 경우
-            {
-                return node;
-            }
-            set_balance(node);
-            return rt_node_ptr;
-        }
-
-
         node_pointer insert(T_key key, T_val value)
         {
             if (_superior.child_left == NULL)
@@ -408,76 +344,7 @@ namespace ft
                 ++_size;
                 return _superior.child_left;
             }
-            //print2D(_superior.child_left);
             return req_insert(key, value, _superior.child_left);
-        }
-
-        // node_pointer insert(T_key key, T_val value)
-        // {
-        //     node_pointer now_node = _superior.child_left;
-        //     if (_superior.child_left == NULL)
-        //     {
-        //         _superior.child_left = allocate_node(key, value);
-        //         _superior.child_left->parents = &_superior;
-        //         ++_size;
-        //         return _superior.child_left;
-        //     }
-        //     while (1)
-        //     {
-        //         if (_compare(key, now_node->data.first))
-        //         {
-        //             if (now_node->child_left == NULL)
-        //             {
-        //                 connect_node(now_node, allocate_node(key, value), LEFT);
-        //                 //renewal_heights();
-        //                 recur_set_balace(_superior.child_left);
-        //                 now_node = now_node->child_left;
-        //                 ++_size;
-        //                 break ;
-        //             }
-        //             else
-        //             {
-        //                 now_node = now_node->child_left;
-        //             }
-        //         }
-        //         else if (_compare(now_node->data.first, key))
-        //         {
-        //             if (now_node->child_right == NULL)
-        //             {
-        //                 connect_node(now_node, allocate_node(key, value), RIGHT);
-        //                 //renewal_heights();
-        //                 recur_set_balace(_superior.child_left);
-        //                 now_node = now_node->child_right;
-        //                 ++_size;
-        //                 break ;
-        //             }
-        //             else
-        //             {
-        //                 now_node = now_node->child_right;
-        //             }
-        //         }
-        //         else
-        //         {
-        //             break ;
-        //         }
-        //     }
-        //     print2D(_superior.child_left);
-        //     return now_node;
-        // }
-
-        void set_balance(node_pointer form_node, node_pointer to_node)
-        {
-            if (form_node == NULL)
-            {
-                return ;
-            }
-            form_node->temp_height = get_renewal_height(form_node);
-            set_balance(form_node);
-            if (form_node == to_node)
-            {
-                return ;
-            }
-            set_balance(form_node->parents, to_node);
         }
 
         void erase(node_pointer ptr_node)
@@ -527,11 +394,8 @@ namespace ft
             connect_node(substitute_node, ptr_node->child_right, RIGHT);
             _node_allocator.destroy(ptr_node);
             _node_allocator.deallocate(ptr_node, 1);
-            //renewal_heights();
             set_balance(from_node, _superior.child_left);
-            //recur_set_balace(_superior.child_left);
             --_size;
-            //print2D(_superior.child_left);
             return ;
         }
 
@@ -666,39 +530,6 @@ namespace ft
             _size = 0;
         }
 
-void print2DUtil(node_pointer root, int space)
-{
-
-    // Base case
-    if (root == NULL)
-        return;
-
-    // Increase distance between levels
-    space += 5;
-
-    // Process right child first
-    print2DUtil(root->child_right, space);
-
-    // Print current node after space
-    // count
-    std::cout << std::endl;
-    for (int i = 5; i < space; i++)
-        std::cout << " ";
-    std::cout << root->data.second  << "(" << root->temp_height << ")" << "\n";
-
-    // Process left child
-    print2DUtil(root->child_left, space);
-}
-
-//Wrapper over print2DUtil()
-void print2D(node_pointer root)
-{
-    static size_t i = 0;
-    // Pass initial space count as 0
-    std::cout << "-----------------["<< i++ <<"]----------------" << std::endl;
-    print2DUtil(root, 0);
-    std::cout << "------------------------------------" << std::endl;
-}
     };
 }
 #endif

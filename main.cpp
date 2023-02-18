@@ -66,13 +66,13 @@ template <typename T>
 std::vector<int> insert_test_2(std::vector<T> vector)
 {
     std::vector<int> v;
-    std::vector<int> tmp;
-    tmp.assign(2600 * _ratio, 1);
-    vector.assign(4200 * _ratio, 1);
-    vector.insert(vector.end() - 1000 * _ratio, tmp.begin(), tmp.end());
-    v.push_back(vector[3]);
-    v.push_back(vector.size());
-    v.push_back(vector.capacity());
+    // std::vector<int> tmp;
+    // tmp.assign(2600 * _ratio, 1);
+    // vector.assign(4200 * _ratio, 1);
+    // vector.insert(vector.end() - 1000 * _ratio, tmp.begin(), tmp.end());
+    // v.push_back(vector[3]);
+    // v.push_back(vector.size());
+    // v.push_back(vector.capacity());
     std::unique_ptr<B> k2(new B(3));
     std::unique_ptr<B> k3(new B(4));
     std::unique_ptr<B> k4(new B(-1));
@@ -88,7 +88,7 @@ std::vector<int> insert_test_2(std::vector<T> vector)
 	}
     catch (...)
 	{
-		//std::cout << e.what() << std::endl;
+		std::cout << "STDERRORRRRRRRRRRRRRRRR" << std::endl;
         v.push_back(vv.size());
         v.push_back(vv.capacity());
     }
@@ -99,13 +99,13 @@ template <typename T>
 std::vector<int> insert_test_3(ft::vector<T> vector)
 {
     std::vector<int> v;
-    ft::vector<int> tmp;
-    tmp.assign(2600 * _ratio, 1);
-    vector.assign(4200 * _ratio, 1);
-    vector.insert(vector.end() - 1000 * _ratio, tmp.begin(), tmp.end());
-    v.push_back(vector[3]);
-    v.push_back(vector.size());
-    v.push_back(vector.capacity());
+    // ft::vector<int> tmp;
+    // tmp.assign(2600 * _ratio, 1);
+    // vector.assign(4200 * _ratio, 1);
+    // vector.insert(vector.end() - 1000 * _ratio, tmp.begin(), tmp.end());
+    // v.push_back(vector[3]);
+    // v.push_back(vector.size());
+    // v.push_back(vector.capacity());
     std::unique_ptr<B> k2(new B(3));
     std::unique_ptr<B> k3(new B(4));
     std::unique_ptr<B> k4(new B(-1));
@@ -121,7 +121,7 @@ std::vector<int> insert_test_3(ft::vector<T> vector)
 	}
     catch (...)
 	{
-		//std::cout << e.what() << std::endl;
+		std::cout << "FTERRORRRRRRRRRRRRRRRR" << std::endl;
         v.push_back(vv.size());
         v.push_back(vv.capacity());
     }
@@ -132,7 +132,7 @@ int main()
 {
 	std::vector<int> std_vector;
 	ft::vector<int> ft_vector;
-	// std::vector<int> rt = insert_test_2(std_vector);
+	//std::vector<int> rt = insert_test_2(std_vector);
 	// std::cout << "****************STD****************" << std::endl;
 	// system("leaks unit_main_test.out");
     std::vector<int> rt2 = insert_test_3(ft_vector);
